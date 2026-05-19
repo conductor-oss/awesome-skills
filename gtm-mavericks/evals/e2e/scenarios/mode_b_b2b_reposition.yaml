@@ -1,0 +1,42 @@
+# E2E scenario: Mode B (repositioning) — B2B SaaS plateau
+
+name: mode_b_b2b_reposition
+mode: reposition
+product:
+  name: Hublink
+  description: |
+    Async-first team workspace. $8M ARR, Series B. Positioned as "team
+    collaboration software." Win-rate dropped 15% YoY against Linear/Notion.
+    Reps say demos land but deals stall. Founder wants to reposition.
+icp_hypothesis: |
+  VPs of Engineering at 50-500 person tech companies who have ≥3 collaboration
+  tools in stack (Slack, Linear/Jira, Notion/Confluence) and complain about
+  context-switching cost.
+corpus:
+  urls:
+    # Reposition mode is corpus-heavy. In a real run these'd be sales call
+    # transcripts and win/loss URLs. For the e2e fixture we use public docs.
+    - https://www.hublink.example.com/about
+  files: []
+  mcps_available: []
+deliverables:
+  - icp_one_pager
+  - positioning
+  - messaging_house
+  - landing_copy
+  - ad_copy
+output_formats:
+  - markdown
+  - pdf
+notifications:
+  email: null
+  slack_webhook: null
+persona_library_version: v1
+max_synthesis_iterations: 3
+
+expectations:
+  ground_truth_score_min: 0.4   # corpus signal should push us above cold-start
+  ground_truth_score_max: 0.85  # if higher, we're probably overclaiming
+  min_panel_disagreements: 1
+  min_strategic_forks: 2   # broaden vs narrow is a classic reposition fork
+  min_anti_messaging: 4    # reposition should explicitly name what to stop saying

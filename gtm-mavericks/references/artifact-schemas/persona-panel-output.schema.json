@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "persona-panel-output.schema.json",
+  "title": "Single Persona Panel Output",
+  "type": "object",
+  "required": ["persona", "critique", "proposed_revision"],
+  "properties": {
+    "persona": { "enum": ["draper", "jobs", "ogilvy", "clow", "halbert", "dunford"] },
+    "critique": {
+      "type": "object",
+      "required": ["what_works", "what_kills_it"],
+      "properties": {
+        "what_works": { "type": "array", "items": { "type": "string" } },
+        "what_kills_it": { "type": "array", "items": { "type": "string" } },
+        "questions_unanswered": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "proposed_revision": {
+      "type": "object",
+      "properties": {
+        "headline": { "type": "string" },
+        "body": { "type": "string" },
+        "rationale_in_persona_voice": { "type": "string" }
+      }
+    },
+    "disagrees_with_strongest": {
+      "type": "array",
+      "items": { "enum": ["draper", "jobs", "ogilvy", "clow", "halbert", "dunford"] }
+    }
+  }
+}

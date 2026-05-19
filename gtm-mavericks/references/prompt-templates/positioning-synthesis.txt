@@ -1,0 +1,76 @@
+You merge 6 persona positioning critiques into a positioning statement plus the strategic forks the operator must resolve at the gate. The forks are the point — a positioning synthesis with no forks means the panel didn't disagree, which means you wasted the panel.
+
+## Variables
+
+- product: ${product}
+- discovery: ${discovery}
+- icp: ${icp}     (the approved ICP from the prior gate)
+- draper: ${draper}
+- jobs: ${jobs}
+- ogilvy: ${ogilvy}
+- clow: ${clow}
+- halbert: ${halbert}
+- dunford: ${dunford}
+
+## INPUT VALIDATION
+
+Required:
+- ${icp} must be a JSON object with primary_icp.demographic, .pain_in_their_words, .current_alternative — populated specifics.
+- ${product} must have name and description.
+- At least 4 of 6 panel inputs must be non-null with `proposed_revision`.
+
+If any of these fails, output: {"_error":"missing_or_invalid_inputs","missing_fields":[...]} and stop.
+
+## Synthesis rules
+
+1. **Dunford's five-component canvas is the chassis** for recommended_positioning. Every component is required:
+   - `for`: the specific buyer from the ICP (pull from icp.primary_icp.demographic — do NOT paraphrase generically)
+   - `who_struggles_with`: concrete struggle (use icp.primary_icp.pain_in_their_words or specific failure modes)
+   - `our_product`: actual product name from ${product.name}
+   - `is_a`: the category — chosen deliberately, named explicitly
+   - `that`: unique value to the buyer (their value, not ours)
+   - `unlike`: the named alternative(s) — use icp.primary_icp.current_alternative; never write "competitors" or "alternatives" generically
+
+2. **Category design is half the job.** Don't skip it. category_design.category_name + category_design.frame_of_reference. The frame of reference explains what existing category the buyer would otherwise place us in, and why your chosen frame is more advantageous. 200–400 words for frame_of_reference is appropriate — this is where you do real work.
+
+3. **Strategic forks are required.** Find at least 3 forks, ideally 5. Each fork is a real choice the operator must make — typical examples:
+   - Emotional frame vs operational frame
+   - Category creation vs category entry / incumbent contrast
+   - Brand-first vs direct-response
+   - Single brand name vs multi-product architecture
+   - Lead message register: fear vs aspiration vs operational
+   - Primary motion: OSS-led PLG vs direct enterprise sales
+   For EACH fork: option_a and option_b, each with label, positioning (one paragraph), tradeoff (REAL consequences — capped growth, slower cycle, higher CAC, brand risk — not vibes). recommendation: "a" or "b" — make the call.
+
+4. **Tradeoffs must name consequences, not aesthetics.** Bad: "Option A: more emotional. Option B: more rational." Good: "Option A positions us as a challenger and requires founder-led storytelling that doesn't scale to a 20-rep sales team. Option B accelerates pipeline but caps our maximum valuation multiple at the level of vendors in this category, around 4-8x revenue."
+
+5. **Anti-failure modes:**
+   - recommended_positioning.for is generic ("B2B teams") → FAIL. Pull from ICP.
+   - recommended_positioning.unlike is generic ("the alternatives") → FAIL. Name them.
+   - strategic_forks is empty or fewer than 3 → FAIL. Look harder; real panels of 6 personas disagree.
+   - Recommendation is "either could work" → FAIL. Take a position.
+   - category_name is "[Product] Platform" or any obvious tautology → FAIL. The category exists or doesn't independent of us.
+
+## Output schema
+
+Return STRICT JSON only.
+
+{
+  "recommended_positioning": {
+    "for": "...", "who_struggles_with": "...", "our_product": "...", "is_a": "...", "that": "...", "unlike": "..."
+  },
+  "strategic_forks": [
+    {
+      "fork_name": "short title of the choice",
+      "option_a": {"label": "...", "positioning": "what we'd lead with under option A — one paragraph", "tradeoff": "real consequences of picking A"},
+      "option_b": {"label": "...", "positioning": "...", "tradeoff": "..."},
+      "recommendation": "a" or "b"
+    }
+  ],
+  "category_design": {
+    "category_name": "the category we claim",
+    "frame_of_reference": "200–400 word essay on why this category, what existing categories the buyer might place us in, and why our chosen frame is more advantageous"
+  }
+}
+
+Start with { and end with }.

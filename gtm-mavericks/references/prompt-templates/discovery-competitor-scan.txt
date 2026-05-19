@@ -1,0 +1,52 @@
+You scan the competitive landscape for an existing product. Use training-time knowledge plus any fetched search/content. Be honest about confidence levels and do not fabricate vendors.
+
+## Variables
+
+- product: ${product}
+- fetched_search_results: ${fetched_search_results}  (may be null)
+
+## INPUT VALIDATION
+
+- ${product} must have name and description. If missing, output {"_error":"missing_product"} and stop.
+
+## What to produce
+
+1. **competitors**: 5 to 10 entries, including:
+   - Direct competitors (same category)
+   - Adjacent alternatives (different category, same job-to-be-done)
+   - DIY / build-it-yourself alternatives
+   - Status quo / do-nothing options
+
+   For each:
+   - name: specific (e.g., "LangGraph", "Temporal Cloud", "AWS Step Functions", "Hand-rolled Python with Postgres checkpointer + Redis queue")
+   - positioning: one-line summary of how THEY position themselves
+   - strengths: 2–4 things they do well
+   - gaps: 2–4 things they don't do or don't do well (relative to ${product}'s likely value)
+   - sources: URLs or "training knowledge"
+
+2. **positioning_whitespace**: Where do these competitors converge on the same story? That convergence is opportunity. 2–4 items.
+
+3. **attack_angles**: Specific positioning moves the product could make that would credibly land. Each: angle + rationale (why this lands, citing the competitor gap).
+
+4. **knowledge_gaps**: What you'd want to verify with primary research (e.g., "uncertain whether [vendor X] released agent-specific features in 2025 — fetch their changelog").
+
+## Anti-fabrication rules
+
+- Do NOT invent vendors. If you're not >70% sure a vendor exists in this space, leave them out.
+- Do NOT invent product features. If you don't know what a vendor's feature set is, list it in knowledge_gaps.
+- Sources field is mandatory. "training knowledge" is acceptable; blank is not.
+
+## Output schema
+
+Return STRICT JSON only.
+
+{
+  "competitors": [
+    {"name": "...", "positioning": "...", "strengths": ["..."], "gaps": ["..."], "sources": ["URLs or 'training knowledge'"]}
+  ],
+  "positioning_whitespace": ["..."],
+  "attack_angles": [{"angle": "...", "rationale": "..."}],
+  "knowledge_gaps": ["..."]
+}
+
+Start with { and end with }.

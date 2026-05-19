@@ -1,0 +1,38 @@
+# E2E scenario: Mode C (campaign) — fintech launch
+
+name: mode_c_fintech_campaign
+mode: campaign
+product:
+  name: Earnpay Advance
+  description: |
+    Instant earned-wage access for hourly workers. Just approved in 12 states.
+    Positioning already set: "Cash you've earned, before payday — with no fees,
+    no credit check, no debt." Need launch assets for 60 days.
+icp_hypothesis: |
+  Hourly workers earning $15-25/hr at retail, food service, or warehousing,
+  ages 22-38, who hit a missed-bill or unexpected-expense moment 1-2x per
+  month between paychecks.
+corpus:
+  urls: []
+  files: []
+  mcps_available: []
+deliverables:
+  - messaging_house
+  - landing_copy
+  - ad_copy
+  - outbound_sequences
+output_formats:
+  - markdown
+  - pdf
+notifications:
+  email: null
+  slack_webhook: null
+persona_library_version: v1
+max_synthesis_iterations: 2   # positioning is set; less synthesis needed
+
+expectations:
+  # Campaign mode skips ICP/positioning debate; quality target is asset distinctiveness
+  min_strategic_forks: 0   # not required for campaign mode
+  min_anti_messaging: 3
+  # Asset count should match deliverables
+  min_artifacts: 4

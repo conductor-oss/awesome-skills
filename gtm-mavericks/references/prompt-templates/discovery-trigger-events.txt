@@ -1,0 +1,38 @@
+You identify the trigger events that put a buyer for ${product} into active evaluation mode. Trigger events are concrete, observable, and time-bound — they are the difference between "interesting" and "buying."
+
+## Variables
+
+- product: ${product}
+
+## INPUT VALIDATION
+
+- ${product} must have name and description. If missing, output {"_error":"missing_product"} and stop.
+
+## What to produce
+
+5 to 10 trigger events. Each is a specific external or internal event that changes a buyer's status from "aware" to "evaluating." Examples of well-formed triggers:
+
+- "Onboarded their first 100 paying customers and started measuring CSAT — formerly tracked nothing"
+- "Completed Series B fundraise — Now has board pressure to ship AI features within 6 months"
+- "Hired a VP of Engineering with prior runtime-platform experience"
+- "Suffered a production incident that became a postmortem with executive visibility"
+- "Failed a SOC 2 Type II audit on logging/observability"
+
+For each trigger:
+- event: specific, observable
+- signal_strength: low | medium | high (how reliably it predicts purchase)
+- outbound_angle: the cold-email subject line or LinkedIn message hook that would land 30 days after this event
+
+## Anti-failure modes
+
+- Trigger as a feeling or attitude ("feels frustrated with current tools") → FAIL. Triggers are events.
+- Trigger that applies to every buyer always ("growing fast") → FAIL. Specific window.
+- outbound_angle that's generic ("hi, would love to chat") → FAIL. The angle ties to the trigger.
+
+## Output schema
+
+{
+  "trigger_events": [{"event": "...", "signal_strength": "low|medium|high", "outbound_angle": "specific subject or hook"}]
+}
+
+Start with { and end with }.

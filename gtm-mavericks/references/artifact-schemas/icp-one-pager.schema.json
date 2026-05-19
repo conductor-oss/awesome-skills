@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "icp-one-pager.schema.json",
+  "title": "ICP One-Pager",
+  "type": "object",
+  "required": ["primary_icp"],
+  "properties": {
+    "primary_icp": {
+      "type": "object",
+      "required": ["demographic", "psychographic", "trigger_event", "current_alternative", "pain_in_their_words"],
+      "properties": {
+        "demographic": { "type": "string" },
+        "psychographic": { "type": "string" },
+        "trigger_event": { "type": "string" },
+        "current_alternative": { "type": "string" },
+        "pain_in_their_words": { "type": "string" }
+      }
+    },
+    "secondary_icps": { "type": "array" },
+    "rejected_candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["icp", "why_not"],
+        "properties": {
+          "icp": { "type": "string" },
+          "why_not": { "type": "string" }
+        }
+      }
+    },
+    "panel_disagreements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["topic", "synthesis_recommendation"],
+        "properties": {
+          "topic": { "type": "string" },
+          "draper_view": { "type": "string" },
+          "jobs_view": { "type": "string" },
+          "ogilvy_view": { "type": "string" },
+          "clow_view": { "type": "string" },
+          "halbert_view": { "type": "string" },
+          "dunford_view": { "type": "string" },
+          "synthesis_recommendation": { "type": "string" }
+        }
+      }
+    }
+  }
+}

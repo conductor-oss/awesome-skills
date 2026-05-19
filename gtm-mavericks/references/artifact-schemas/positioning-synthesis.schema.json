@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "positioning-synthesis.schema.json",
+  "title": "Positioning Synthesis",
+  "type": "object",
+  "required": ["recommended_positioning"],
+  "properties": {
+    "recommended_positioning": {
+      "type": "object",
+      "required": ["for", "who_struggles_with", "our_product", "is_a", "that", "unlike"],
+      "properties": {
+        "for": { "type": "string" },
+        "who_struggles_with": { "type": "string" },
+        "our_product": { "type": "string" },
+        "is_a": { "type": "string" },
+        "that": { "type": "string" },
+        "unlike": { "type": "string" }
+      }
+    },
+    "strategic_forks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["fork_name", "option_a", "option_b", "recommendation"],
+        "properties": {
+          "fork_name": { "type": "string" },
+          "option_a": {
+            "type": "object",
+            "required": ["label", "positioning", "tradeoff"],
+            "properties": {
+              "label": { "type": "string" },
+              "positioning": { "type": "string" },
+              "tradeoff": { "type": "string" }
+            }
+          },
+          "option_b": {
+            "type": "object",
+            "required": ["label", "positioning", "tradeoff"],
+            "properties": {
+              "label": { "type": "string" },
+              "positioning": { "type": "string" },
+              "tradeoff": { "type": "string" }
+            }
+          },
+          "recommendation": { "enum": ["a", "b"] }
+        }
+      }
+    },
+    "category_design": {
+      "type": "object",
+      "properties": {
+        "category_name": { "type": "string" },
+        "frame_of_reference": { "type": "string" }
+      }
+    }
+  }
+}

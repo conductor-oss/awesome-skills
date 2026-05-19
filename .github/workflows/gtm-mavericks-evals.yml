@@ -1,0 +1,211 @@
+name: gtm-mavericks evals
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'gtm-mavericks/**'
+      - '.github/workflows/gtm-mavericks-evals.yml'
+  pull_request:
+    paths:
+      - 'gtm-mavericks/**'
+      - '.github/workflows/gtm-mavericks-evals.yml'
+  workflow_dispatch:
+    inputs:
+      run_judge:
+        description: 'Run LLM judge rubrics (costs ~$0.10 per run)'
+        required: false
+        default: 'true'
+        type: choice
+        options: ['true', 'false']
+      judge_samples:
+        description: 'Samples per rubric (more = less variance)'
+        required: false
+        default: '2'
+
+concurrency:
+  group: gtm-mavericks-evals-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: gtm-mavericks
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────
+  # 1. Static evals — fast, no external dependencies
+  # ─────────────────────────────────────────────────────────────────
+  static:
+    name: Static evals
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      - run: pip install pyyaml
+      - run: python3 evals/runner.py --tier static
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: static-report-${{ github.run_id }}
+          path: gtm-mavericks/evals/results/
+          retention-days: 14
+
+  # ─────────────────────────────────────────────────────────────────
+  # 2. Smoke — spin up Conductor locally and register workflow defs.
+  # Catches JSON schema regressions Conductor would reject.
+  # ─────────────────────────────────────────────────────────────────
+  smoke-register:
+    name: Smoke — register workflows on a local Conductor
+    runs-on: ubuntu-latest
+    needs: static
+    env:
+      CONDUCTOR_SERVER_URL: http://localhost:8080/api
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node (for conductor CLI)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install conductor CLI
+        run: npm install -g @conductor-oss/conductor-cli
+
+      - name: Set up Python (for register_workflows.sh helpers)
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Start local Conductor server in background
+        run: |
+          # `conductor server start` downloads and runs the OSS Conductor jar.
+          # Background it; capture logs for debugging if we need to look later.
+          nohup conductor server start > /tmp/conductor-server.log 2>&1 &
+          echo "  started conductor server (pid $!)"
+
+      - name: Wait for Conductor server to be reachable
+        timeout-minutes: 8
+        run: |
+          # OSS Conductor's /health endpoint lives at the server root,
+          # NOT under /api. Strip the trailing /api if present.
+          ROOT="${CONDUCTOR_SERVER_URL%/api}"
+          for i in $(seq 1 90); do
+            if curl -sf "$ROOT/health" > /dev/null 2>&1; then
+              echo "  Conductor ready after ${i}x5s"
+              exit 0
+            fi
+            if [ $((i % 6)) -eq 0 ]; then
+              echo "  …still waiting (attempt $i)…"
+            fi
+            sleep 5
+          done
+          echo "::error::Conductor never came up. Last 80 lines of server log:"
+          tail -80 /tmp/conductor-server.log || true
+          exit 1
+
+      - name: Register workflow definitions (this is the actual smoke test)
+        run: ./scripts/register_workflows.sh
+
+      - name: Verify registration
+        run: |
+          # All 4 of our workflows should appear in the list.
+          REGISTERED="$(conductor workflow list 2>/dev/null)"
+          for wf in gtm_mavericks_v1 discovery_new_product discovery_reposition discovery_campaign; do
+            if echo "$REGISTERED" | grep -q "$wf"; then
+              echo "  [ok] $wf registered"
+            else
+              echo "::error::$wf was not registered"
+              exit 1
+            fi
+          done
+
+      - name: Upload conductor server log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: conductor-server-log-${{ github.run_id }}
+          path: /tmp/conductor-server.log
+          retention-days: 7
+
+      - name: Stop conductor server
+        if: always()
+        run: conductor server stop || true
+
+  # ─────────────────────────────────────────────────────────────────
+  # 3. Bundle evals — schemas, structural rules, LLM judge (if key set)
+  # Runs against the committed example fixture, no Conductor needed.
+  # ─────────────────────────────────────────────────────────────────
+  bundle:
+    name: Bundle evals
+    runs-on: ubuntu-latest
+    needs: static
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      - run: pip install pyyaml anthropic
+
+      - name: Decide whether to run LLM judge
+        id: judge
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "Judge skipped — ANTHROPIC_API_KEY secret not set."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ github.event.inputs.run_judge }}" = "false" ]; then
+            echo "Judge skipped — workflow_dispatch input."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Judge will run."
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Bundle evals (no judge)
+        if: steps.judge.outputs.run != 'true'
+        run: |
+          python3 evals/runner.py --tier bundle \
+            --bundle evals/bundle/fixtures/example.bundle.json \
+            --no-judge
+
+      - name: Bundle evals (with LLM judge)
+        if: steps.judge.outputs.run == 'true'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          SAMPLES="${{ github.event.inputs.judge_samples || '2' }}"
+          python3 evals/runner.py --tier bundle \
+            --bundle evals/bundle/fixtures/example.bundle.json \
+            --judge-samples "$SAMPLES"
+
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundle-report-${{ github.run_id }}
+          path: gtm-mavericks/evals/results/
+          retention-days: 14
+
+      - name: PR comment on failure
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const resultsDir = 'gtm-mavericks/evals/results';
+            const dirs = fs.readdirSync(resultsDir).sort().reverse();
+            if (dirs.length === 0) return;
+            const reportPath = path.join(resultsDir, dirs[0], 'report.md');
+            if (!fs.existsSync(reportPath)) return;
+            const body = `## gtm-mavericks bundle evals failed\n\n${fs.readFileSync(reportPath, 'utf8')}`;
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });

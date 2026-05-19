@@ -1,0 +1,49 @@
+# E2E scenario: Mode A (new product) — consumer wellness app
+# This is the intake payload the e2e runner submits to Conductor.
+# Pass criteria are documented in evals/README.md.
+
+name: mode_a_consumer_app
+mode: new_product
+product:
+  name: FlightCalm
+  description: |
+    iOS app using Apple Watch heart-rate variability to trigger personalized
+    breathing exercises mid-flight for people with flight anxiety. No traction
+    yet, no website. Founder has 4 interview transcripts with anxious flyers.
+icp_hypothesis: |
+  Frequent business travelers, 32-52, who have flown weekly for years but
+  developed anxiety after a turbulent flight in the last 18 months. They are
+  managing professional reputations and don't want to be the colleague who
+  Xanaxes before every flight.
+corpus:
+  urls: []
+  files: []
+  mcps_available: []
+deliverables:
+  - icp_one_pager
+  - positioning
+  - messaging_house
+  - sales_playbook
+  - landing_copy
+  - outbound_sequences
+output_formats:
+  - markdown
+  - pdf
+notifications:
+  email: null
+  slack_webhook: null
+persona_library_version: v1
+max_synthesis_iterations: 3
+
+# Expected behaviors — checked against the bundle after the run completes:
+expectations:
+  # Discovery should produce some signal even without corpus/URLs, because
+  # web search is enabled. Ground truth should be honest about low signal.
+  ground_truth_score_max: 0.6   # cold-start cap; flag if higher (overclaim)
+  ground_truth_score_min: 0.2   # below this means discovery failed
+  # ICP synthesis should surface at least one real disagreement
+  min_panel_disagreements: 1
+  # Positioning should have ≥2 forks for a new product (wide-open category space)
+  min_strategic_forks: 2
+  # Anti-messaging should call out at least 3 things to stop saying
+  min_anti_messaging: 3

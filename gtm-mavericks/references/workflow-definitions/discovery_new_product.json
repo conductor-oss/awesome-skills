@@ -1,0 +1,77 @@
+{
+  "name": "discovery_new_product",
+  "version": 1,
+  "description": "Deep-research GTM discovery for a NEW product launch. Uses Anthropic webSearch + user-supplied corpus URL fetch. Same shape as discovery_reposition v8 but with launch-focused prompt.",
+  "ownerEmail": "viren@orkes.io",
+  "schemaVersion": 2,
+  "inputParameters": [
+    "product",
+    "icp_hypothesis",
+    "corpus"
+  ],
+  "outputParameters": {
+    "discovery": "${synthesize_discovery.output.result}",
+    "fetched_corpus": "${build_corpus_content.output.result}"
+  },
+  "tasks": [
+    {
+      "name": "build_fetch_tasks",
+      "taskReferenceName": "build_fetch_tasks",
+      "type": "INLINE",
+      "inputParameters": {
+        "corpus": "${workflow.input.corpus}",
+        "evaluatorType": "graaljs",
+        "expression": "function e() { var urls = ($.corpus && $.corpus.urls) ? $.corpus.urls : []; var dyn = []; var dynInput = {}; for (var i = 0; i < urls.length && i < 10; i++) { var ref = 'fetch_url_' + i; dyn.push({ name: 'fetch_url', taskReferenceName: ref, type: 'HTTP', inputParameters: { http_request: { uri: urls[i], method: 'GET', connectionTimeOut: 5000, readTimeOut: 15000, headers: { 'User-Agent': 'gtm-mavericks/1.0', 'Accept': 'text/html,text/plain,*/*' } } } }); dynInput[ref] = {}; } return { dynamicTasks: dyn, dynamicTasksInput: dynInput, url_count: urls.length }; } e();"
+      }
+    },
+    {
+      "name": "fetch_corpus_urls",
+      "taskReferenceName": "fetch_corpus_urls",
+      "type": "FORK_JOIN_DYNAMIC",
+      "inputParameters": {
+        "dynamicTasks": "${build_fetch_tasks.output.result.dynamicTasks}",
+        "dynamicTasksInput": "${build_fetch_tasks.output.result.dynamicTasksInput}"
+      },
+      "dynamicForkTasksParam": "dynamicTasks",
+      "dynamicForkTasksInputParamName": "dynamicTasksInput"
+    },
+    {
+      "name": "fetch_join",
+      "taskReferenceName": "fetch_join",
+      "type": "JOIN"
+    },
+    {
+      "name": "build_corpus_content",
+      "taskReferenceName": "build_corpus_content",
+      "type": "INLINE",
+      "inputParameters": {
+        "fetch_results": "${fetch_join.output}",
+        "corpus": "${workflow.input.corpus}",
+        "evaluatorType": "graaljs",
+        "expression": "function e() { var out = []; var fr = $.fetch_results || {}; var urls = ($.corpus && $.corpus.urls) ? $.corpus.urls : []; for (var i = 0; i < urls.length; i++) { var ref = 'fetch_url_' + i; var taskOut = fr[ref] || {}; var body = ''; if (taskOut.response && taskOut.response.body !== undefined) { var raw = taskOut.response.body; if (typeof raw === 'string') { body = raw; } else if (raw !== null && typeof raw === 'object') { try { body = JSON.stringify(raw); } catch(e) { body = String(raw); } } else { body = String(raw); } } if (body.length > 12000) body = body.substring(0, 12000) + '\\n\\n[truncated; total ' + body.length + ' chars]'; out.push({ url: urls[i], status: (taskOut.response && taskOut.response.statusCode) ? taskOut.response.statusCode : null, body: body }); } return { fetched: out, count: out.length }; } e();"
+      }
+    },
+    {
+      "name": "synthesize_discovery",
+      "taskReferenceName": "synthesize_discovery",
+      "type": "LLM_CHAT_COMPLETE",
+      "inputParameters": {
+        "llmProvider": "anthropic",
+        "model": "claude-sonnet-4-5",
+        "maxTokens": 12000,
+        "messages": [
+          {
+            "role": "system",
+            "message": "You are a senior GTM analyst doing deep, citable research. Use the web_search tool aggressively \u2014 open pages, quote them, cite URLs. Do not fabricate sources."
+          },
+          {
+            "role": "user",
+            "message": "You are conducting deep-research GTM discovery for a NEW PRODUCT being launched.\n\n## Product\n${workflow.input.product}\n\n## ICP hypothesis (optional, from operator)\n${workflow.input.icp_hypothesis}\n\n## User-supplied corpus (already fetched, may be empty for a stealth-stage launch)\nThe operator gave us these URLs (if any) and we fetched their contents (truncated to 12KB each):\n${build_corpus_content.output.result.fetched}\n\n## Your task\n\nUse the **web_search** tool to do deep, citable research. Open pages when relevant -- quote them. Specifically investigate:\n\n1. **Category landscape (2024-2026).** What category does this product enter? What's the category called by buyers, journalists, retailers? Has terminology shifted recently? Find dated evidence.\n2. **Competitive set (5-12).** Direct competitors (same exact thing), adjacent (similar promise different shape), aspirational (the prestige brands buyers reference), and the status-quo alternative (what buyers do today). For each: name, one-line positioning, price point if visible, what they're known for, source URL.\n3. **Customer signals.** Find real reviews, subreddit threads, Substack posts, retailer reviews, founder interviews. What do buyers in this category actually complain about? What language do they use to describe what they love? Quote with URLs.\n4. **Buyer triggers and occasions.** When do buyers in this category buy? Gift-giving? Self-indulgence? Discovery via media? Find evidence with citations.\n5. **Cultural currents.** What's the broader narrative around this category in 2025-2026? Health, sustainability, craft, provenance, ethics? Cite specific recent articles/movements.\n\nSince this is a NEW launch (not a repositioning), skip \"current positioning audit\" -- there is no existing product surface to audit yet.\n\n## Output\n\nReturn STRICT JSON only (no markdown fence, no preamble). Match this schema:\n\n{\n  \"market_summary\": \"4-8 sentences. Cite URLs inline.\",\n  \"category\": {\"name\": \"category name\", \"alternatives\": [\"named brands + status quo\"]},\n  \"competitors\": [\n    {\"name\": \"...\", \"positioning\": \"...\", \"price_point\": \"...\", \"strengths\": \"...\", \"gaps\": \"...\", \"source_url\": \"...\"}\n  ],\n  \"customer_signals\": [\n    {\"signal\": \"...\", \"verbatim_or_paraphrase\": \"...\", \"source_url\": \"...\", \"audience\": \"buyer | reviewer | analyst | journalist\"}\n  ],\n  \"buyer_triggers\": [{\"trigger\": \"specific occasion or moment\", \"evidence\": \"...\", \"source_url\": \"...\"}],\n  \"cultural_currents\": [{\"current\": \"the trend or narrative\", \"evidence\": \"...\", \"source_url\": \"...\"}],\n  \"ground_truth_score\": <0.0-1.0, honest>,\n  \"gaps\": [\"specific things we'd want to verify with primary research\"]\n}\n\nBe honest about ground_truth_score:\n- 0.8+ if multiple cited web sources across competitors, signals, triggers\n- 0.5-0.7 if some web cites but heavy on training knowledge\n- <0.4 if mostly training knowledge with thin citations\n\nStart with { and end with }."
+          }
+        ],
+        "webSearch": true,
+        "thinkingTokenLimit": 6000
+      }
+    }
+  ]
+}
