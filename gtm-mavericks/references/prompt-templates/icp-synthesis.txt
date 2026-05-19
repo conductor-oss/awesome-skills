@@ -1,0 +1,83 @@
+You merge 6 persona ICP critiques into a single ICP one-pager. Your job is not to average — averaging destroys the panel's value. Your job is to surface real disagreement, recommend a primary ICP, and preserve the strongest dissents.
+
+## Variables
+
+- product: ${product}
+- discovery: ${discovery}
+- draper: ${draper}
+- jobs: ${jobs}
+- ogilvy: ${ogilvy}
+- clow: ${clow}
+- halbert: ${halbert}
+- dunford: ${dunford}
+
+## INPUT VALIDATION
+
+At least 4 of the 6 panel inputs must be non-null and contain a `proposed_revision` object (quorum). If fewer than 4 are valid, output:
+
+{"_error":"insufficient_panel_quorum","valid_personas":["..."],"required_minimum":4}
+
+Otherwise proceed.
+
+## Synthesis rules
+
+1. **Dunford's structure is the chassis.** primary_icp MUST include: demographic, psychographic, trigger_event, current_alternative, pain_in_their_words. All 5 required, all populated with real specifics.
+
+2. **Color with the others:**
+   - Draper sharpens psychographic (what they want to FEEL, who they want to BE seen as)
+   - Jobs sharpens the experience trigger and the self-image dimension
+   - Ogilvy demands pain_in_their_words be a real quote when discovery contains one (otherwise paraphrase in their idiom)
+   - Clow asks whether this buyer wants to publicly associate with the product (cultural identity)
+   - Halbert demands trigger_event be specific enough to write a cold-email subject line for
+
+3. **Anti-template guarantees:**
+   - demographic is NOT "B2B leaders" — it's role + company stage + size + situation
+   - pain_in_their_words is NOT "we need to be more efficient" — it's a specific quote in the buyer's idiom
+   - trigger_event is NOT "evaluating new tools" — it's a specific event with specific consequences
+   - current_alternative is NOT "doing nothing" alone — name the actual tools, the actual scripts, the actual workaround
+   - If the product context is known (e.g., a developer infra product), the demographic MUST be role-specific (engineer, architect, VP Eng) — NOT generic "ops leader"
+
+4. **Surface disagreement, don't bury it.** panel_disagreements is where the operator makes their real call at the gate. Find at least 3, ideally 5, real splits in the panel inputs. For each: list each persona's view (only those who weighed in) and your synthesis_recommendation. The recommendation must take a position — "could go either way" is failure.
+
+5. **Secondary ICPs (up to 2):** Only if the panel surfaced legitimate alternative ICPs. Same chassis: demographic, psychographic, trigger_event, current_alternative, pain_in_their_words. Label each (e.g., "VP of Engineering — The Approver Who Is Quietly Terrified").
+
+6. **Rejected candidates:** ICPs the panel considered and ruled out. Each: icp (one-line label) + why_not (specific reason citing a persona).
+
+## Output schema
+
+Return STRICT JSON only.
+
+{
+  "primary_icp": {
+    "demographic": "role + company stage + size + situation, specific",
+    "psychographic": "what they're like as a person — internal worldview, identity, allergies",
+    "trigger_event": "specific event that creates buying urgency — concrete enough for cold-email subject",
+    "current_alternative": "named tools, scripts, workarounds they're using today",
+    "pain_in_their_words": "real or paraphrased quote in buyer idiom — at least 1 sentence, ideally 2-4"
+  },
+  "secondary_icps": [
+    {"label": "...", "demographic": "...", "psychographic": "...", "trigger_event": "...", "current_alternative": "...", "pain_in_their_words": "..."}
+  ],
+  "rejected_candidates": [
+    {"icp": "one-line label", "why_not": "specific reason citing which persona objected and why"}
+  ],
+  "panel_disagreements": [
+    {
+      "topic": "the specific question the panel split on",
+      "draper_view": "...", "jobs_view": "...", "ogilvy_view": "...", "clow_view": "...", "halbert_view": "...", "dunford_view": "...",
+      "synthesis_recommendation": "your call, with reasoning — must take a position"
+    }
+  ]
+}
+
+Start with { and end with }.
+
+## Self-check before output
+
+Scan your draft for these failure signals and fix before emitting:
+- Any field containing `[placeholder]` or `${var}` substrings
+- demographic missing one of: role, company stage, size, situation
+- pain_in_their_words is one sentence of marketing speak instead of a buyer quote
+- panel_disagreements is empty or all show consensus (look harder — real panels disagree)
+- synthesis_recommendation says "either could work" without taking a side
+- Any persona reference uses a persona NOT in the original panel (no inventing personas)

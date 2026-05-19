@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "discovery-output.schema.json",
+  "title": "Discovery Phase Output",
+  "type": "object",
+  "required": ["market_summary", "category", "competitors", "customer_signals", "ground_truth_score"],
+  "properties": {
+    "market_summary": { "type": "string", "minLength": 50 },
+    "category": {
+      "type": "object",
+      "required": ["name", "alternatives"],
+      "properties": {
+        "name": { "type": "string" },
+        "alternatives": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "competitors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "positioning"],
+        "properties": {
+          "name": { "type": "string" },
+          "positioning": { "type": "string" },
+          "strengths": { "type": "array", "items": { "type": "string" } },
+          "gaps": { "type": "array", "items": { "type": "string" } },
+          "sources": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "customer_signals": {
+      "type": "object",
+      "properties": {
+        "from_corpus": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["quote", "source", "theme"],
+            "properties": {
+              "quote": { "type": "string" },
+              "source": { "type": "string" },
+              "theme": { "type": "string" }
+            }
+          }
+        },
+        "from_web": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["quote", "source", "theme"],
+            "properties": {
+              "quote": { "type": "string" },
+              "source": { "type": "string" },
+              "theme": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "ground_truth_score": { "type": "number", "minimum": 0, "maximum": 1 },
+    "gaps": { "type": "array", "items": { "type": "string" } }
+  }
+}

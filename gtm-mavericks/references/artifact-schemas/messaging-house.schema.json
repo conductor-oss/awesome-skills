@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "messaging-house.schema.json",
+  "title": "Messaging House",
+  "type": "object",
+  "required": ["category", "north_star", "audience_promise", "proof_pillars", "taglines"],
+  "properties": {
+    "category": { "type": "string" },
+    "north_star": { "type": "string" },
+    "audience_promise": { "type": "string" },
+    "proof_pillars": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["claim", "evidence"],
+        "properties": {
+          "claim": { "type": "string" },
+          "evidence": { "type": "string" },
+          "from_corpus": { "type": "boolean" }
+        }
+      }
+    },
+    "taglines": {
+      "type": "array",
+      "description": "Tagline candidates. Either plain strings (legacy) or {line, rationale} objects (current workflow output).",
+      "items": {
+        "oneOf": [
+          { "type": "string" },
+          {
+            "type": "object",
+            "required": ["line"],
+            "properties": {
+              "line": { "type": "string" },
+              "rationale": { "type": "string" },
+              "voice_lean": { "type": "string" }
+            }
+          }
+        ]
+      }
+    },
+    "anti_messaging": {
+      "type": "array",
+      "description": "Things we will NOT say. Either plain strings (legacy) or {refuse, say_instead} objects (current workflow output).",
+      "items": {
+        "oneOf": [
+          { "type": "string" },
+          {
+            "type": "object",
+            "required": ["refuse"],
+            "properties": {
+              "refuse": { "type": "string" },
+              "say_instead": { "type": "string" },
+              "reason": { "type": "string" },
+              "why": { "type": "string" }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

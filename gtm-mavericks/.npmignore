@@ -1,0 +1,26 @@
+# Development artifacts not needed in the published package
+.git/
+.gitignore
+.idea/
+.vscode/
+.DS_Store
+*.log
+
+# Generated run outputs (these are user data, not package data)
+.gtm/
+gtm-output/
+
+# Test fixtures
+test/
+tests/
+__tests__/
+
+# CI
+.github/
+.gitlab-ci.yml
+
+# Docs that live in the parent repo, not the package
+docs/
+evals/results/
+evals/bundle/fixtures/*.bundle.json
+!evals/bundle/fixtures/example.bundle.json

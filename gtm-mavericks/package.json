@@ -1,0 +1,49 @@
+{
+  "name": "@conductor-skills/gtm",
+  "version": "0.1.0",
+  "description": "GTM Mavericks — a Claude Code skill that runs deep go-to-market strategy through a Conductor workflow, with a 6-persona panel of marketing mavericks (Draper, Jobs, Ogilvy, Clow, Halbert, Dunford).",
+  "keywords": [
+    "claude-code",
+    "claude-skill",
+    "gtm",
+    "go-to-market",
+    "marketing",
+    "positioning",
+    "conductor",
+    "orkes",
+    "agentic-workflow"
+  ],
+  "homepage": "https://github.com/conductoross/awesome-skills/tree/main/gtm-mavericks",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/conductoross/awesome-skills.git",
+    "directory": "gtm-mavericks"
+  },
+  "bugs": {
+    "url": "https://github.com/conductoross/awesome-skills/issues"
+  },
+  "license": "MIT",
+  "author": "Orkes (https://orkes.io)",
+  "bin": {
+    "gtm-install": "./bin/install.js",
+    "gtm-uninstall": "./bin/uninstall.js"
+  },
+  "scripts": {
+    "postinstall": "node ./bin/postinstall.js"
+  },
+  "files": [
+    "SKILL.md",
+    "README.md",
+    "plugin.json",
+    "bin/",
+    "references/",
+    "scripts/",
+    "examples/"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

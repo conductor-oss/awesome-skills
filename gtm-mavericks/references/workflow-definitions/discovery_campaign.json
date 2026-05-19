@@ -1,0 +1,77 @@
+{
+  "name": "discovery_campaign",
+  "version": 1,
+  "description": "Deep-research GTM discovery for a CAMPAIGN run. Uses Anthropic webSearch + user-supplied corpus URL fetch. Same shape as discovery_reposition v8 but with campaign-focused prompt (positioning already set; research focuses on campaign hooks, channel signals, audience activation moments).",
+  "ownerEmail": "viren@orkes.io",
+  "schemaVersion": 2,
+  "inputParameters": [
+    "product",
+    "icp_hypothesis",
+    "corpus"
+  ],
+  "outputParameters": {
+    "discovery": "${synthesize_discovery.output.result}",
+    "fetched_corpus": "${build_corpus_content.output.result}"
+  },
+  "tasks": [
+    {
+      "name": "build_fetch_tasks",
+      "taskReferenceName": "build_fetch_tasks",
+      "type": "INLINE",
+      "inputParameters": {
+        "corpus": "${workflow.input.corpus}",
+        "evaluatorType": "graaljs",
+        "expression": "function e() { var urls = ($.corpus && $.corpus.urls) ? $.corpus.urls : []; var dyn = []; var dynInput = {}; for (var i = 0; i < urls.length && i < 10; i++) { var ref = 'fetch_url_' + i; dyn.push({ name: 'fetch_url', taskReferenceName: ref, type: 'HTTP', inputParameters: { http_request: { uri: urls[i], method: 'GET', connectionTimeOut: 5000, readTimeOut: 15000, headers: { 'User-Agent': 'gtm-mavericks/1.0', 'Accept': 'text/html,text/plain,*/*' } } } }); dynInput[ref] = {}; } return { dynamicTasks: dyn, dynamicTasksInput: dynInput, url_count: urls.length }; } e();"
+      }
+    },
+    {
+      "name": "fetch_corpus_urls",
+      "taskReferenceName": "fetch_corpus_urls",
+      "type": "FORK_JOIN_DYNAMIC",
+      "inputParameters": {
+        "dynamicTasks": "${build_fetch_tasks.output.result.dynamicTasks}",
+        "dynamicTasksInput": "${build_fetch_tasks.output.result.dynamicTasksInput}"
+      },
+      "dynamicForkTasksParam": "dynamicTasks",
+      "dynamicForkTasksInputParamName": "dynamicTasksInput"
+    },
+    {
+      "name": "fetch_join",
+      "taskReferenceName": "fetch_join",
+      "type": "JOIN"
+    },
+    {
+      "name": "build_corpus_content",
+      "taskReferenceName": "build_corpus_content",
+      "type": "INLINE",
+      "inputParameters": {
+        "fetch_results": "${fetch_join.output}",
+        "corpus": "${workflow.input.corpus}",
+        "evaluatorType": "graaljs",
+        "expression": "function e() { var out = []; var fr = $.fetch_results || {}; var urls = ($.corpus && $.corpus.urls) ? $.corpus.urls : []; for (var i = 0; i < urls.length; i++) { var ref = 'fetch_url_' + i; var taskOut = fr[ref] || {}; var body = ''; if (taskOut.response && taskOut.response.body !== undefined) { var raw = taskOut.response.body; if (typeof raw === 'string') { body = raw; } else if (raw !== null && typeof raw === 'object') { try { body = JSON.stringify(raw); } catch(e) { body = String(raw); } } else { body = String(raw); } } if (body.length > 12000) body = body.substring(0, 12000) + '\\n\\n[truncated; total ' + body.length + ' chars]'; out.push({ url: urls[i], status: (taskOut.response && taskOut.response.statusCode) ? taskOut.response.statusCode : null, body: body }); } return { fetched: out, count: out.length }; } e();"
+      }
+    },
+    {
+      "name": "synthesize_discovery",
+      "taskReferenceName": "synthesize_discovery",
+      "type": "LLM_CHAT_COMPLETE",
+      "inputParameters": {
+        "llmProvider": "anthropic",
+        "model": "claude-sonnet-4-5",
+        "maxTokens": 12000,
+        "messages": [
+          {
+            "role": "system",
+            "message": "You are a senior GTM analyst doing deep, citable research. Use the web_search tool aggressively \u2014 open pages, quote them, cite URLs. Do not fabricate sources."
+          },
+          {
+            "role": "user",
+            "message": "You are conducting deep-research GTM discovery for a CAMPAIGN \u2014 positioning is already set; this run is about finding the sharpest campaign angles, channels, and audience activation moments.\n\n## Product\n${workflow.input.product}\n\n## ICP hypothesis (optional, from operator)\n${workflow.input.icp_hypothesis}\n\n## User-supplied corpus (already fetched, may be empty)\n${build_corpus_content.output.result.fetched}\n\n## Your task\n\nUse the **web_search** tool to do deep, citable research. Open pages when relevant -- quote them. Specifically investigate:\n\n1. **Current category conversation (2024-2026).** What are buyers, critics, journalists, and influencers talking about in this category RIGHT NOW? What hashtags, Substack newsletters, subreddits, and media outlets are active? Find dated evidence.\n2. **Competitive campaign audit.** What are the top 5-8 competitors doing in paid, organic, and earned media right now? What messages are they running? What seems to be working (engagement, reviews, press)? What are they ignoring?\n3. **Audience activation signals.** When and where does the ICP engage with this category online? Seasonal triggers? Events? Cultural moments? Life events? Find evidence with URLs.\n4. **Channel landscape.** Which channels (Instagram, TikTok, email, podcast ads, retail events, influencer, PR) are dominant and which are underused for this category? Cite specific examples.\n5. **Hook angles and creative signals.** What creative approaches, copy styles, or story angles get high engagement in this category? What's oversaturated? Cite specific posts or campaigns.\n\n## Output\n\nReturn STRICT JSON only (no markdown fence, no preamble). Match this schema:\n\n{\n  \"market_summary\": \"4-8 sentences. Cite URLs inline.\",\n  \"category\": {\"name\": \"category name\", \"alternatives\": [\"named brands + status quo\"]},\n  \"competitors\": [\n    {\"name\": \"...\", \"campaign_approach\": \"...\", \"active_channels\": [\"...\"], \"what_works\": \"...\", \"blind_spots\": \"...\", \"source_url\": \"...\"}\n  ],\n  \"audience_signals\": [\n    {\"signal\": \"...\", \"channel\": \"...\", \"evidence\": \"...\", \"source_url\": \"...\"}\n  ],\n  \"activation_moments\": [{\"moment\": \"specific occasion or trigger\", \"evidence\": \"...\", \"source_url\": \"...\"}],\n  \"hook_angles\": [{\"angle\": \"...\", \"why_it_works\": \"...\", \"example_or_source\": \"...\"}],\n  \"channel_recommendations\": [{\"channel\": \"...\", \"fit\": \"high|medium|low\", \"rationale\": \"...\", \"example\": \"...\"}],\n  \"ground_truth_score\": <0.0-1.0, honest>,\n  \"gaps\": [\"specific things we'd want to validate with primary research\"]\n}\n\nBe honest about ground_truth_score:\n- 0.8+ if multiple cited web sources across competitor campaigns, audience signals, channels\n- 0.5-0.7 if some web cites but heavy on training knowledge\n- <0.4 if mostly training knowledge with thin citations\n\nStart with { and end with }."
+          }
+        ],
+        "webSearch": true,
+        "thinkingTokenLimit": 6000
+      }
+    }
+  ]
+}

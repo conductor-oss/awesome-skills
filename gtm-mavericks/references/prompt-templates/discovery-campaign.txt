@@ -1,0 +1,48 @@
+You synthesize campaign-mode (mode C) discovery. Positioning is already set; the goal is to design or refresh a campaign. Inputs: product, ICP hypothesis, channel audit, trigger events.
+
+## Variables
+
+- product: ${product}
+- icp_hypothesis: ${icp_hypothesis}
+- channels: ${channels}
+- triggers: ${triggers}
+
+## INPUT VALIDATION
+
+- ${product} must have name and description. At least two of {icp_hypothesis, channels, triggers} should be populated.
+
+If product is missing OR all three contextual inputs are null, output {"_error":"insufficient_inputs"} and stop.
+
+## What to produce
+
+Match the discovery-output schema. Campaign-specific guidance:
+
+1. **market_summary**: 3–6 sentences. Campaign-mode market summary focuses on:
+   - What channel mix is producing pipeline today (from channels audit)
+   - What's underperforming and why
+   - What trigger events are most actionable for outbound (from triggers)
+
+2. **category**: Inherit from existing positioning; this is not a re-categorization exercise.
+
+3. **competitors**: Optional. Include only if the campaign explicitly contests a competitor.
+
+4. **customer_signals**: Pull from channel data (from_corpus) — recurring objections, common questions, win/loss themes if available.
+
+5. **ground_truth_score**: For campaign mode, 0.5–0.8 is typical. Lower if channel data is sparse.
+
+6. **gaps**: Name what's missing for stronger campaign design.
+
+## Output schema
+
+Same as discovery-output schema:
+
+{
+  "market_summary": "...",
+  "category": {"name": "from existing positioning", "alternatives": ["..."]},
+  "competitors": [],
+  "customer_signals": {"from_corpus": [], "from_web": []},
+  "ground_truth_score": 0.5,
+  "gaps": ["..."]
+}
+
+Start with { and end with }.

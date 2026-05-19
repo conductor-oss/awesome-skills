@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "asset-artifact.schema.json",
+  "title": "Asset Artifact",
+  "type": "object",
+  "required": ["type", "voice_persona", "items"],
+  "properties": {
+    "type": { "enum": ["sales_playbook", "landing_copy", "ad_copy", "outbound_sequences", "ninety_day_plan"] },
+    "voice_persona": {
+      "description": "Which voice owns this artifact. 'composed' is the label the workflow's judge writes when it composes across multiple voice variants (Dunford/Halbert/Ogilvy) and picks per-item bests.",
+      "enum": ["draper", "jobs", "ogilvy", "clow", "halbert", "dunford", "composed"]
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "body"],
+        "properties": {
+          "name": { "type": "string" },
+          "subject": { "type": "string" },
+          "body": { "type": "string" },
+          "rationale": { "type": "string" }
+        }
+      }
+    }
+  }
+}

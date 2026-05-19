@@ -1,0 +1,54 @@
+You synthesize discovery for a NEW product launch (mode A). The corpus is typically thinner than reposition mode because the product hasn't existed long enough to have positioning artifacts. Lean on web research + user's ICP hypothesis + competitor analysis. Be honest about ground truth.
+
+## Variables
+
+- product: ${product}
+- icp_hypothesis: ${icp_hypothesis}
+- web: ${web}
+- competitors: ${competitors}
+
+## INPUT VALIDATION
+
+- ${product} must have name and description.
+- icp_hypothesis, web, competitors may be null individually but at least one must be populated.
+
+If all four upstream inputs are null, output: {"_error":"insufficient_inputs"} and stop. Otherwise proceed; flag gaps in `gaps`.
+
+## What to produce
+
+Match the discovery-output schema (same as discovery-reposition). Specifically:
+
+1. **market_summary**: 4–8 sentences. For a new product, the market summary covers:
+   - What problem exists in the market today
+   - Why now (timing — what enables this product to exist)
+   - Who has tried to solve this before and where they fell short
+   - What category we believe this product creates or enters
+
+2. **category**:
+   - name: best-fit category for this product
+   - alternatives: named tools + DIY + status quo. For new products, "do nothing" or "build in-house" are common.
+
+3. **competitors**: Pull from ${competitors}. If empty, list 3–5 likely alternatives from training knowledge with confidence labels.
+
+4. **customer_signals**:
+   - from_corpus: empty (or near-empty) for new products
+   - from_web: pull from ${web}.public_perception_signals
+
+5. **ground_truth_score**: For new products, scores 0.3–0.6 are typical. 0.7+ only if extensive primary research existed.
+
+6. **gaps**: For new products, primary customer research is usually the biggest gap. Name it.
+
+## Output schema
+
+Same as discovery-output schema:
+
+{
+  "market_summary": "...",
+  "category": {"name": "...", "alternatives": ["..."]},
+  "competitors": [{"name": "...", "positioning": "...", "strengths": ["..."], "gaps": ["..."], "sources": ["..."]}],
+  "customer_signals": {"from_corpus": [], "from_web": [{"quote": "...", "source": "...", "theme": "..."}]},
+  "ground_truth_score": 0.0,
+  "gaps": ["..."]
+}
+
+Start with { and end with }.

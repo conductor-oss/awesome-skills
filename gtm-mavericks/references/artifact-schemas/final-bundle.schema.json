@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "final-bundle.schema.json",
+  "title": "Final Bundle",
+  "type": "object",
+  "required": ["run_id", "mode", "icp_one_pager", "positioning", "messaging_house", "artifacts"],
+  "properties": {
+    "run_id": { "type": "string" },
+    "mode": { "enum": ["new_product", "reposition", "campaign"] },
+    "icp_one_pager": { "$ref": "icp-one-pager.schema.json" },
+    "positioning": { "$ref": "positioning-synthesis.schema.json" },
+    "messaging_house": { "$ref": "messaging-house.schema.json" },
+    "artifacts": { "type": "array", "items": { "$ref": "asset-artifact.schema.json" } },
+    "ground_truth_score": { "type": "number", "minimum": 0, "maximum": 1 },
+    "persona_panel_log": { "type": "array" },
+    "decisions_log": { "type": "array" }
+  }
+}

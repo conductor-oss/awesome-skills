@@ -1,0 +1,73 @@
+---
+title: "GTM Strategy — {{product.name}}"
+subtitle: "Run {{run_id}}"
+date: "{{generated_at}}"
+toc: true
+toc-depth: 2
+geometry: margin=1in
+fontsize: 11pt
+---
+
+# Executive summary
+
+This document is the output of a `gtm-mavericks` run for **{{product.name}}**.
+**Mode:** {{mode}}
+**Ground truth score:** {{ground_truth_score}} *(0–1; how much of this is grounded in your data vs. inferred from public sources)*
+
+The strategy below was developed by a panel of 6 marketing-maverick personas — Don Draper, Steve Jobs, David Ogilvy, Lee Clow, Gary Halbert, April Dunford — who critiqued and proposed alternatives at every strategic gate. Their disagreements are preserved in the appendix.
+
+---
+
+{{> icp-one-pager}}
+
+---
+
+{{> positioning}}
+
+---
+
+{{> messaging-house}}
+
+---
+
+# Deliverables
+
+{{#artifacts}}
+## {{type}}
+
+*Voice: {{voice_persona}}*
+
+{{#items}}
+### {{name}}
+
+{{#subject}}**{{subject}}**
+
+{{/subject}}
+{{body}}
+
+{{#rationale}}
+> *Why this works:* {{rationale}}
+{{/rationale}}
+
+{{/items}}
+{{/artifacts}}
+
+---
+
+# Appendix A: Panel disagreements
+
+The personas disagreed on the following points. Where the synthesis took a side, the recommendation is noted.
+
+{{#decisions_log}}
+- **At {{phase}}:** {{summary}} → *user chose:* {{user_choice}}
+{{/decisions_log}}
+
+# Appendix B: Persona panel log
+
+{{#persona_panel_log}}
+### {{phase}}: {{persona}}
+
+**What worked:** {{what_works}}
+**What killed it:** {{what_kills_it}}
+
+{{/persona_panel_log}}

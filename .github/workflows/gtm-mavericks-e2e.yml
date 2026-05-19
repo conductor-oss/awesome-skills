@@ -1,0 +1,111 @@
+name: gtm-mavericks e2e (manual)
+
+# E2E spins up a local Conductor server in CI, registers workflows, runs a
+# scenario end-to-end (30 to 60 min, ~$5 in LLM cost), then grades the bundle.
+#
+# Trigger manually before releases. Requires ANTHROPIC_API_KEY secret for the
+# Conductor workflow's LLM tasks and the judge rubrics.
+
+on:
+  workflow_dispatch:
+    inputs:
+      scenario:
+        description: 'Scenario file under evals/e2e/scenarios/'
+        required: true
+        default: 'mode_b_b2b_reposition.yaml'
+        type: choice
+        options:
+          - mode_a_consumer_app.yaml
+          - mode_b_b2b_reposition.yaml
+          - mode_c_fintech_campaign.yaml
+
+defaults:
+  run:
+    working-directory: gtm-mavericks
+
+env:
+  CONDUCTOR_SERVER_URL: http://localhost:8080/api
+
+jobs:
+  e2e:
+    name: End-to-end run + grade
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install deps
+        run: |
+          pip install pyyaml anthropic
+          npm install -g @conductor-oss/conductor-cli
+
+      - name: Start local Conductor server
+        run: |
+          nohup conductor server start > /tmp/conductor-server.log 2>&1 &
+          echo "  started conductor server (pid $!)"
+
+      - name: Wait for Conductor server to be reachable
+        timeout-minutes: 8
+        run: |
+          ROOT="${CONDUCTOR_SERVER_URL%/api}"
+          for i in $(seq 1 90); do
+            if curl -sf "$ROOT/health" > /dev/null 2>&1; then
+              echo "  Conductor ready after ${i}x5s"
+              exit 0
+            fi
+            [ $((i % 6)) -eq 0 ] && echo "  …still waiting (attempt $i)…"
+            sleep 5
+          done
+          echo "::error::Conductor never came up."
+          tail -80 /tmp/conductor-server.log || true
+          exit 1
+
+      - name: Configure ANTHROPIC provider for Conductor workflow LLM tasks
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          # Conductor's LLM_CHAT_COMPLETE tasks need ANTHROPIC_API_KEY visible
+          # to the running server. The simplest path is to export it before
+          # `conductor server start`, but since we backgrounded the server
+          # already, we restart it with the env now in scope.
+          conductor server stop || true
+          sleep 2
+          ANTHROPIC_API_KEY="$ANTHROPIC_API_KEY" \
+            nohup conductor server start > /tmp/conductor-server.log 2>&1 &
+          ROOT="${CONDUCTOR_SERVER_URL%/api}"
+          for i in $(seq 1 60); do
+            curl -sf "$ROOT/health" > /dev/null 2>&1 && break
+            sleep 5
+          done
+          echo "  ready with ANTHROPIC_API_KEY in scope"
+
+      - name: Register workflow definitions
+        run: ./scripts/register_workflows.sh
+
+      - name: Run e2e scenario
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: ./evals/e2e/run_e2e.sh "evals/e2e/scenarios/${{ github.event.inputs.scenario }}"
+
+      - name: Stop conductor server
+        if: always()
+        run: conductor server stop || true
+
+      - name: Upload all artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-${{ github.event.inputs.scenario }}-${{ github.run_id }}
+          path: |
+            gtm-mavericks/evals/results/
+            /tmp/conductor-server.log
+          retention-days: 30

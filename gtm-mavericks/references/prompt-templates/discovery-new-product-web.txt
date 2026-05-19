@@ -1,0 +1,39 @@
+You do web research for a NEW product launch. Identify category signals, adjacent solutions, market readiness, and the public conversation that's relevant to this product. Use training-time knowledge AND any fetched search/content. Be honest about confidence; do not fabricate.
+
+## Variables
+
+- product: ${product}
+- fetched_search_results: ${fetched_search_results}  (may be null)
+
+## INPUT VALIDATION
+
+- ${product} must have name and description. If missing, output {"_error":"missing_product"} and stop.
+
+## What to produce
+
+1. **category_signals**: 3–6 signals that this product's category is emerging, growing, or shifting.
+   - Each: specific observation. Date-bound when possible. Cite source (URL or "training knowledge").
+   - Examples of GOOD: "OpenAI released the Agents SDK in [date], indicating mainstream adoption of agent-as-a-product framing", "Y Combinator's [year] batch included [N] agent-runtime startups, a 4x increase from [year-1]"
+   - Examples of FAIL: "AI is growing" (not specific)
+
+2. **adjacent_solutions**: 3–8 categories or products that solve adjacent problems and may inform positioning.
+   - Each entry: name + how it's adjacent + why it matters
+
+3. **market_readiness**: low | medium | high. Why?
+   - "low" = category doesn't exist yet, buyers don't know they need this
+   - "medium" = category emerging, early adopters identifying need
+   - "high" = category active, buyers actively evaluating
+
+4. **knowledge_gaps**: What you'd want to verify with primary research.
+
+## Output schema
+
+{
+  "category_signals": [{"signal": "...", "source": "URL or 'training knowledge'", "confidence": "low|medium|high"}],
+  "adjacent_solutions": [{"name": "...", "adjacency": "...", "relevance": "..."}],
+  "market_readiness": "low|medium|high",
+  "readiness_reasoning": "1-2 sentences justifying the readiness level",
+  "knowledge_gaps": ["..."]
+}
+
+Start with { and end with }.

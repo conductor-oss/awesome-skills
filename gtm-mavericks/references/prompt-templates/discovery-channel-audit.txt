@@ -1,0 +1,35 @@
+You audit the current marketing/sales channels for a product running a campaign. Identify what's performing, what's not, and where there's leverage. Mode C (campaign) discovery only.
+
+## Variables
+
+- product: ${product}
+- corpus: ${corpus}
+- fetched_content: ${fetched_content}  (may be null)
+
+## INPUT VALIDATION
+
+- ${product} must have name and description.
+- ${corpus} should include channel performance data, ad creatives, campaign briefs, or sales reports. If empty, flag in gaps and produce thin output.
+
+If product is missing, output: {"_error":"missing_product"} and stop.
+
+## What to produce
+
+For each channel found in corpus (e.g., paid search, paid social, content/SEO, outbound, events, partnerships, OSS community):
+- name: channel name
+- performance: what the data says (specific — "CPL $340 over 90 days, conversion to opp 4%" not "performing OK")
+- issues: 2–4 specific failure modes observed
+- evidence_source: where in the corpus this comes from
+
+Plus 3–6 recommendations: each names a channel + a specific change + the expected impact.
+
+If corpus is empty, set channels=[] and put a recommendation entry that says "Insufficient channel data in corpus — recommend instrumenting [specific metric] before campaign design."
+
+## Output schema
+
+{
+  "channels": [{"name": "...", "performance": "...", "issues": ["..."], "evidence_source": "..."}],
+  "recommendations": ["specific actions"]
+}
+
+Start with { and end with }.

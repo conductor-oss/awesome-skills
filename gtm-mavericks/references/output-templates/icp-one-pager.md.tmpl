@@ -1,0 +1,45 @@
+# ICP One-Pager
+
+**Run:** {{run_id}}
+**Mode:** {{mode}}
+**Ground truth score:** {{ground_truth_score}}
+
+## Primary ICP
+
+**Who:** {{primary_icp.demographic}}
+
+**What they're like:** {{primary_icp.psychographic}}
+
+**What triggers their buying moment:** {{primary_icp.trigger_event}}
+
+**What they're using today:** {{primary_icp.current_alternative}}
+
+**In their own words:** "{{primary_icp.pain_in_their_words}}"
+
+## Secondary ICPs
+
+{{#secondary_icps}}
+- {{this}}
+{{/secondary_icps}}
+
+## ICPs the panel considered and rejected
+
+{{#rejected_candidates}}
+- **{{icp}}** — {{why_not}}
+{{/rejected_candidates}}
+
+## Panel disagreements
+
+{{#panel_disagreements}}
+### {{topic}}
+
+- **Draper's view:** {{draper_view}}
+- **Jobs' view:** {{jobs_view}}
+- **Ogilvy's view:** {{ogilvy_view}}
+- **Clow's view:** {{clow_view}}
+- **Halbert's view:** {{halbert_view}}
+- **Dunford's view:** {{dunford_view}}
+
+**Synthesis recommendation:** {{synthesis_recommendation}}
+
+{{/panel_disagreements}}

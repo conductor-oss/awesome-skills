@@ -1,0 +1,57 @@
+# gtm-mavericks eval report — 20260519-142017
+
+**Tier:** all  |  **Total:** 53  |  **Pass:** 53  |  **Fail:** 0  |  **Skip:** 0
+
+- ✅ **frontmatter:parses** — 
+- ✅ **frontmatter:has_name** — 
+- ✅ **frontmatter:has_description** — 
+- ✅ **frontmatter:description_substance** — 545 chars
+- ✅ **frontmatter:description_use_signal** — describes when to invoke
+- ✅ **frontmatter:has_allowed-tools** — 
+- ✅ **personas:roster_complete** — all 6 personas present
+- ✅ **personas:no_unexpected** — 
+- ✅ **personas:clow:frontmatter** — 
+- ✅ **personas:clow:sections** — 
+- ✅ **personas:draper:frontmatter** — 
+- ✅ **personas:draper:sections** — 
+- ✅ **personas:dunford:frontmatter** — 
+- ✅ **personas:dunford:sections** — 
+- ✅ **personas:halbert:frontmatter** — 
+- ✅ **personas:halbert:sections** — 
+- ✅ **personas:jobs:frontmatter** — 
+- ✅ **personas:jobs:sections** — 
+- ✅ **personas:ogilvy:frontmatter** — 
+- ✅ **personas:ogilvy:sections** — 
+- ✅ **prompts:referenced_by_workflows** — no external prompt references (inlined via allowRawPrompts)
+- ✅ **prompts:essential:persona-panel-critique** — 
+- ✅ **prompts:essential:icp-synthesis** — 
+- ✅ **prompts:essential:positioning-synthesis** — 
+- ✅ **prompts:essential:messaging-house** — 
+- ✅ **workflows:gtm_mavericks_v1.json:parses** — 
+- ✅ **workflows:discovery_new_product.json:parses** — 
+- ✅ **workflows:discovery_reposition.json:parses** — 
+- ✅ **workflows:discovery_campaign.json:parses** — 
+- ✅ **workflows:main:has_4_gates** — all 4 gate refs present
+- ✅ **workflows:main:icp_panel_exists** — 
+- ✅ **workflows:main:positioning_panel_exists** — 
+- ✅ **workflows:main:mode_router_complete** — all 3 modes routed: ['campaign', 'new_product', 'reposition']
+- ✅ **judge:anti_messaging** — mean score 5.00/5 across 3 sample(s) — scores: [5, 5, 5]
+- ✅ **judge:icp_specificity** — mean score 4.67/5 across 3 sample(s) — scores: [5, 4, 5]
+- ✅ **judge:persona_voice** — mean score 4.67/5 across 3 sample(s) — scores: [5, 5, 4]
+- ✅ **judge:positioning_differentiation** — mean score 4.00/5 across 3 sample(s) — scores: [4, 4, 4]
+- ✅ **schema:icp_one_pager:validates** — 
+- ✅ **schema:positioning:validates** — 
+- ✅ **schema:messaging_house:validates** — 
+- ✅ **schema:artifacts:validate** — 4 artifact(s) valid
+- ✅ **structure:icp:complete_primary** — 
+- ✅ **structure:icp:demographic_specificity** — 563 chars
+- ✅ **structure:positioning:has_forks** — 5 strategic fork(s)
+- ✅ **structure:positioning:complete_statement** — 
+- ✅ **structure:positioning:has_category** — Trust-First Craft Chocolate Membership
+- ✅ **structure:messaging_house:pillars** — 5 proof pillars
+- ✅ **structure:messaging_house:anti_messaging** — 7 anti-messaging entries
+- ✅ **structure:messaging_house:pillars_have_evidence** — 
+- ✅ **structure:artifacts:present** — 4 artifact(s)
+- ✅ **structure:artifacts:voice_persona_recorded** — 
+- ✅ **structure:bundle:mode** — reposition
+- ✅ **structure:bundle:run_id** — gtm-20260518-194319-cv
