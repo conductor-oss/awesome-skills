@@ -42,10 +42,11 @@ jobs:
         with:
           python-version: '3.12'
           cache: 'pip'
+          cache-dependency-path: gtm-mavericks/evals/requirements.txt
 
       - name: Install deps
         run: |
-          pip install pyyaml anthropic
+          pip install -r evals/requirements.txt
           npm install -g @conductor-oss/conductor-cli
 
       - name: Start local Conductor server

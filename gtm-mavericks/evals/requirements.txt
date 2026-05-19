@@ -1,0 +1,3 @@
+# Eval suite dependencies. Pinned-by-major for stability.
+pyyaml>=6.0,<7
+anthropic>=0.40,<1
