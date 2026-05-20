@@ -12,9 +12,8 @@ User has: 8 lost-deal call transcripts, current website copy, last quarter's sal
 2. *Product?* → "Hublink — async-first team workspace. Currently positioned as 'team collaboration software.'"
 3. *Buyer?* → "VPs of Engineering at 50–500 person tech companies"
 4. *Materials?* → `./inputs/lost-deals/`, `./inputs/website-copy.md`, `./inputs/rep-survey.csv`
-5. *Deliverables?* → Default (ICP, positioning, messaging house, landing copy, ad copy)
-6. *Output?* → All three
-7. *Notifications?* → Yes, email at gates
+5. *Model?* → Balanced (claude-sonnet-4-6); consider Most Capable (claude-opus-4-7) for an $8M ARR Series B repositioning bet.
+6. *Refinement passes?* → 4 (one extra over default — lost-deal patterns benefit from deeper Socratic probing).
 
 ## What "looks right"
 
@@ -31,8 +30,8 @@ User has: 8 lost-deal call transcripts, current website copy, last quarter's sal
 - Expect a fork between *broadening* the category vs. *narrowing* and dominating a niche. Forks with real tradeoffs (growth ceiling vs. CAC efficiency).
 - Anti-messaging should specifically call out the "we do everything" positioning that's not working.
 
-### Asset voice
-- Recommend Dunford for B2B SaaS — operational, sales-team-executable.
+### Asset voices
+- For B2B SaaS like Hublink, the judge will typically pick Dunford (operational, sales-team-executable) or Ogilvy (proof-led) for the landing and ad copy. Halbert variants stay in the bundle for comparison — sometimes useful for re-engagement outbound to stalled deals.
 
 ## Pass criteria
 

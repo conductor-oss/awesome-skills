@@ -1,4 +1,13 @@
 /gtm-mavericks/evals/results
 /gtm-mavericks/evals/bundle/__pycache__
 /gtm-mavericks/evals/static
+/gtm-mavericks/evals/bundle/fixtures/*.bundle.json
+!/gtm-mavericks/evals/bundle/fixtures/example.bundle.json
+
+# Per-user runtime state from running the skill — never commit
+.gtm/
+gtm-output/
+node_modules/
+__pycache__/
+
 .DS_Store

@@ -19,8 +19,6 @@ __tests__/
 .github/
 .gitlab-ci.yml
 
-# Docs that live in the parent repo, not the package
-docs/
-evals/results/
-evals/bundle/fixtures/*.bundle.json
-!evals/bundle/fixtures/example.bundle.json
+# Eval suite stays in the source repo, not the published package
+evals/
+
