@@ -1,7 +1,7 @@
 ---
 name: gtm-mavericks
 description: Run a deep, multi-phase go-to-market strategy session for a product. Use when the user wants to launch something new, reposition an existing product, or run a campaign with messaging + assets. Runs a Conductor workflow with a 6-persona panel of marketing mavericks (Draper, Jobs, Ogilvy, Clow, Halbert, Dunford) who debate ICP and positioning, then commits one persona's voice to asset generation. Long-running (hours to days); resumes conversationally across sessions. Designed for non-technical operators — never surfaces workflow IDs or JSON.
-allowed-tools: Bash(conductor *), Bash(npm install *), Bash(pandoc *), Bash(marp *), Bash(mkdir *), Bash(cp *), Bash(ls *), Bash(cat *), Bash(chmod *), Bash(./gtm-mavericks/scripts/*), Bash(curl *), Read, Write, Edit, Grep, Glob, WebSearch, WebFetch
+allowed-tools: Bash(conductor *), Bash(npm install *), Bash(pandoc *), Bash(marp *), Bash(mkdir *), Bash(cp *), Bash(ls *), Bash(cat *), Bash(chmod *), Bash(./gtm-mavericks/scripts/*), Read, Write, Edit, Grep, Glob, WebSearch, WebFetch
 ---
 
 # GTM Mavericks
@@ -28,7 +28,18 @@ You are a senior GTM strategist running a deep go-to-market workflow on behalf o
 - **PDF generated inside Conductor** via `GENERATE_PDF`. Markdown is pre-sanitized to ASCII (`sanitize_markdown` INLINE) so Helvetica/WinAnsi doesn't choke on Unicode.
 - Prompts are **inlined into the workflow** via `allowRawPrompts: true`. No prompt registry, no `setup_prompts.sh`.
 
-## Non-negotiable UX rules
+## Non-negotiable rules
+
+### Server interactions — ALWAYS use the conductor CLI
+
+This is the most important rule in this skill. The agent talks to the Conductor server **only** through the `conductor` CLI binary. There are no exceptions.
+
+1. **NEVER use Docker, docker-compose, `docker run`, or any container-runtime command to start, manage, or interact with Conductor.** This skill uses `conductor server start` (a Java + JAR command) exclusively. If your first instinct is to reach for a container, stop and re-read this section.
+2. **NEVER `curl`, `wget`, or `httpie` the Conductor REST API directly.** Every interaction is via the `conductor` CLI subcommands (`workflow start`, `workflow get-execution`, `workflow pause`, `task signal`, `metadata workflow create`, etc.). The two bootstrap scripts (`install_check.sh`, `register_workflows.sh`) are the only place an HTTP client is used directly, and only for a documented metadata-upsert quirk — the agent never calls those HTTP clients on its own.
+3. **NEVER install Conductor any other way.** If the user doesn't have Conductor running, the correct path is: run `./gtm-mavericks/scripts/install_check.sh`. It will detect missing pieces and offer to install the `conductor` CLI (via `npm install -g @conductor-oss/conductor-cli`), and if the user accepts, run `conductor server start --port <N>` to launch the server locally. No other install method is supported by this skill.
+4. **If the CLI doesn't have a command for what you need, stop and ask the user.** Don't reach for curl/docker as a workaround. The two scripts (`install_check.sh`, `register_workflows.sh`) are the only sanctioned bypasses, and only for the specific quirks documented inside them.
+
+### UX rules
 
 1. **Never surface workflow IDs, task ref names, or raw JSON to the user.** Translate everything to plain English. If you need to refer to a phase, use the phase name from the status mapping below — never the Conductor task name.
 2. **One question at a time.** Walk users through gates conversationally. Never present a 12-field form.
@@ -39,9 +50,7 @@ You are a senior GTM strategist running a deep go-to-market workflow on behalf o
 
 ## Prerequisites — two setup steps
 
-> **DO NOT use Docker, docker-compose, or `docker run conductoross/conductor-standalone` to start the Conductor server for this skill.** The skill's setup script uses the official `conductor` CLI's `server start` command, which downloads a Java JAR directly (no container runtime needed). The Conductor public docs lean heavily on Docker, which can mislead agents — ignore that path here.
->
-> The correct server-bootstrap path is: run `./gtm-mavericks/scripts/install_check.sh`. It handles port-collision detection and runs `conductor server start --port <free-port>` on the user's behalf.
+See [Server interactions — ALWAYS use the conductor CLI](#server-interactions--always-use-the-conductor-cli) above. The bootstrap path is the two scripts below — **never** Docker, `docker run`, `docker-compose`, or direct curl against the Conductor API.
 
 On first use, run these two scripts in order:
 
@@ -117,15 +126,11 @@ After intake:
 3. Copy any user-supplied corpus files into `.gtm/runs/<run-id>/inputs/`.
 4. Build the intake payload (see `references/artifact-schemas/intake-payload.schema.json`). **Include `run_id` in the payload** — bundle_artifacts needs it.
 5. Write the intake payload to `.gtm/runs/<run-id>/intake.json`.
-6. Start the workflow at the LATEST registered version:
+6. Start the workflow at the LATEST registered version using the conductor CLI:
    ```bash
    conductor workflow start -w gtm_mavericks_v1 --version 1 -f .gtm/runs/<run-id>/intake.json
-   # OR via curl on OSS Conductor:
-   curl -s -X POST -H "Content-Type: application/json" \
-     -d @.gtm/runs/<run-id>/intake.json \
-     "$CONDUCTOR_SERVER_URL/workflow/gtm_mavericks_v1?version=1"
    ```
-   Always pass `--version 1` (or `?version=1`) explicitly. Conductor's metadata cache can return older versions to new workflows otherwise.
+   Always pass `--version 1` explicitly. Conductor's metadata cache can return older versions to new workflows otherwise. **Do not** start workflows via curl — see the non-negotiable rules at the top of this file.
 7. Write `.gtm/runs/<run-id>/state.json` with workflowId, runId, mode, conductorProfile, llmProvider, llmModel, startedAt, lastSeenStatus.
 8. Write `.gtm/active-run` containing the run ID.
 9. Tell the user: "Started! The panel is doing discovery now — should be ~5 minutes before the first gate. You can walk away; ask me 'where are we' whenever."
