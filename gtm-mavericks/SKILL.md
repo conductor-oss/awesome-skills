@@ -26,7 +26,7 @@ You are a senior GTM strategist running a deep go-to-market workflow on behalf o
 - **Iteration-aware synthesis prompts**: explicit OUTPUT CONTRACT forces JSON on every iteration, not commentary on what changed.
 - **Named-input salvage**: `*_loop_latest` tasks read each iteration's draft.result via separate `iter1_result`/`iter2_result`/... inputParameters, walking back to find the first parseable JSON. Sidesteps Conductor's graaljs polyglot proxy bug (see Gotcha #7).
 - **PDF generated inside Conductor** via `GENERATE_PDF`. Markdown is pre-sanitized to ASCII (`sanitize_markdown` INLINE) so Helvetica/WinAnsi doesn't choke on Unicode.
-- Prompts are **inlined into the workflow** via `allowRawPrompts: true`. No prompt registry, no `setup_prompts.sh`.
+- Prompts are **inlined directly into each LLM task's `messages`**. No prompt registry, no `setup_prompts.sh`.
 
 ## Non-negotiable rules
 
@@ -202,7 +202,7 @@ The main workflow is 25 tasks. All three discovery sub-workflows are at v1 (webS
 
 | Phase | Mechanism | ~Duration |
 |---|---|---|
-| 0. **Mode routing** | `mode_router` SWITCH routes to `discovery_reposition` (mode B), `discovery_new_product` (mode A), or `discovery_campaign` (mode C). All three sub-workflows are at v8 with webSearch. A `discovery_normalize` INLINE task immediately after the switch picks whichever ref ran and exposes a unified `discovery` output for all downstream tasks. | <1 sec |
+| 0. **Mode routing** | `mode_router` SWITCH routes to `discovery_reposition` (mode B), `discovery_new_product` (mode A), or `discovery_campaign` (mode C). All three sub-workflows are at v1 with webSearch. A `discovery_normalize` INLINE task immediately after the switch picks whichever ref ran and exposes a unified `discovery` output for all downstream tasks. | <1 sec |
 | 1a. Corpus fetch | `build_fetch_tasks` (INLINE) → `fetch_corpus_urls` (FORK_JOIN_DYNAMIC HTTP) → `fetch_join` → `build_corpus_content` (INLINE). Pulls user-supplied URLs (up to 10), captures body (12KB cap each) | <1 min |
 | 1b. **Discovery synthesis with webSearch** | `synthesize_discovery` is a single `LLM_CHAT_COMPLETE` with `webSearch: true` and a high `thinkingTokenLimit`. The LLM does multi-turn web research itself, returning customer signals with citable URLs. Burns ~250K prompt tokens in a real run | 4–8 min |
 | 2a. ICP panel | FORK_JOIN of 6 personas (Draper/Jobs/Ogilvy/Clow/Halbert/Dunford) in parallel | 1–2 min |
@@ -223,20 +223,20 @@ The main workflow is 25 tasks. All three discovery sub-workflows are at v1 (webS
 | 5g. **GENERATE_PDF** | Conductor's native PDF task renders sanitized markdown; returns `{ location: "file://...", sizeBytes: N }` in `pdf` output | 10–30 sec |
 | 6. Finalize | INLINE | <1 sec |
 
-**Workflow outputs:** `final_bundle` (full JSON), `markdown` (sanitized doc), `pdf` (base64).
+**Workflow outputs:** `final_bundle` (full JSON), `executive_summary` (structured JSON), `markdown` (sanitized doc), `pdf` (`{ location: "file://...", sizeBytes: N }` from `GENERATE_PDF`).
 
 **Typical total: 30–60 min.** Easy cases (probe satisfied at iter 1–2 on all loops) finish in ~30 min. Hard cases that hit `max_synthesis_iterations` on every loop take ~55–60 min.
 
 ### Key design decisions
 
-1. **`allowRawPrompts: true`** on every LLM task. Prompts inlined into `inputParameters.messages`. No prompt registry needed — fully OSS-portable.
+1. **Prompts inlined into `inputParameters.messages`** on every LLM task. No prompt registry needed — fully OSS-portable.
 2. **`LLM_CHAT_COMPLETE` with `webSearch: true`** for discovery research. Replaces the earlier external-search HTTP plumbing (Brave/Google Custom Search). The Anthropic web_search tool opens pages itself and returns citable URLs.
 3. **Socratic adversarial probe** replaces the older critic. Six probe types push falsification + extension instead of "more detail please." See `references/prompt-templates/socratic-probe.txt`.
 4. **Recurrence rule (3 strikes)**: probes that recur unresolved across 3 iterations move to `documented_gaps` and stop blocking convergence. Prevents loops from churning on unresolvable items.
 5. **Configurable iteration cap** via intake's `max_synthesis_iterations` (default 3). DO_WHILE `loopCondition`: `iteration <= 2 || (iteration < max_iter && !satisfied)` — guarantees ≥2 iterations, caps at max_iter, exits early on satisfaction.
 6. **Latest-iteration salvage**: an INLINE `*_loop_latest` task downstream of each loop scans iteration history backwards for a valid JSON payload. Handles cases where the LLM produces meta-commentary on iteration N but valid output on iteration N-1.
 7. **Variants + judge** for assets: 3 parallel voice variants per asset, judge composes the winner per item. The judge LLM is the only step that sees all 3 voices.
-8. **Bundle → render → sanitize → GENERATE_PDF** tail is all in-Conductor. No `scripts/render_pdf.sh` invocation required; the workflow returns the PDF as base64 directly.
+8. **Bundle → render → sanitize → GENERATE_PDF** tail is all in-Conductor. No `scripts/render_pdf.sh` invocation required; the workflow returns the PDF location directly.
 9. **No HUMAN tasks.** All 4 gates are INLINE pass-throughs. Conversational review happens at phase boundaries via this skill. HUMAN-task signaling in OSS Conductor was unreliable in our testing.
 10. **Executive summary is its own LLM call**, not inlined into bundle_artifacts. Reason: bundle_artifacts is deterministic INLINE merge (fast, no token limit); the synthesis step needs an LLM with the full bundle context.
 11. **No `enrich_bundle` merge step.** Earlier versions tried to merge bundle + exec_summary into one object before render_markdown. Conductor's graaljs polyglot proxy can't be enumerated/stringified, so the clone always came back empty. Workaround: render_markdown takes bundle + summary as separate named inputs; workflow outputs expose them as separate top-level fields (`final_bundle` and `executive_summary`).
@@ -330,13 +330,12 @@ These are the issues that broke earlier runs. The current workflow already accou
 
 ### 1. Prompts are inlined — no prompt API needed
 
-The workflow uses `LLM_CHAT_COMPLETE` with `allowRawPrompts: true` and `messages: [{role, message}]`. Prompts live in the workflow JSON, not in Conductor's prompt registry. `setup_prompts.sh` is legacy and not required.
+The workflow uses `LLM_CHAT_COMPLETE` with `messages: [{role, message}]`. Prompts live in the workflow JSON, not in Conductor's prompt registry. `setup_prompts.sh` is legacy and not required.
 
 ### 2. LLM_CHAT_COMPLETE input shape
 
 - `llmProvider: "anthropic"`, `model: "claude-sonnet-4-6"` (or matching Anthropic model)
 - `messages`: array of `{role, message}` entries
-- `allowRawPrompts: true`
 - `webSearch: true` to enable Anthropic's web_search tool
 - `thinkingTokenLimit` for extended-thinking budget
 - `maxTokens` for output cap
@@ -417,7 +416,7 @@ gtm-mavericks/
 │   ├── workflow-definitions/
 │   │   ├── gtm_mavericks_v1.json      # main workflow (v1) — the source of truth, ships ready to register
 │   │   ├── discovery_new_product.json # sub-workflow for mode A
-│   │   ├── discovery_reposition.json  # sub-workflow for mode B (v8 — webSearch deep research)
+│   │   ├── discovery_reposition.json  # sub-workflow for mode B (v1 — webSearch deep research)
 │   │   └── discovery_campaign.json    # sub-workflow for mode C
 │   ├── prompt-templates/
 │   │   ├── socratic-probe.txt         # adversarial probe with recurrence rule

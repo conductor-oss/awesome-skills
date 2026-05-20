@@ -1,7 +1,7 @@
 {
   "name": "discovery_campaign",
   "version": 1,
-  "description": "Deep-research GTM discovery for a CAMPAIGN run. Uses Anthropic webSearch + user-supplied corpus URL fetch. Same shape as discovery_reposition v8 but with campaign-focused prompt (positioning already set; research focuses on campaign hooks, channel signals, audience activation moments).",
+  "description": "Deep-research GTM discovery for a CAMPAIGN run. Uses Anthropic webSearch + user-supplied corpus URL fetch. Same shape as discovery_reposition v1 but with campaign-focused prompt (positioning already set; research focuses on campaign hooks, channel signals, audience activation moments).",
   "ownerEmail": "viren@orkes.io",
   "schemaVersion": 2,
   "inputParameters": [

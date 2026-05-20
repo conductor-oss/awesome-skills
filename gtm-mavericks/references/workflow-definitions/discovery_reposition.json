@@ -1,7 +1,7 @@
 {
   "name": "discovery_reposition",
   "version": 1,
-  "description": "Discovery v8: corpus URL fetch + single LLM_CHAT_COMPLETE with webSearch (deep research via tool use). Replaces v7's DO_WHILE+HTTP-search machinery.",
+  "description": "Discovery v1: corpus URL fetch + single LLM_CHAT_COMPLETE with webSearch (deep research via tool use).",
   "ownerEmail": "viren@orkes.io",
   "schemaVersion": 2,
   "inputParameters": [

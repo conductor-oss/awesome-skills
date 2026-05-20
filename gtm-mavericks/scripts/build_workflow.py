@@ -54,7 +54,8 @@ DESCRIPTION = (
     "GTM Mavericks v1: all three modes wired (reposition/new_product/campaign) via "
     "discovery_normalize INLINE passthrough. webSearch deep research, Socratic probe, "
     "iteration-aware synthesis prompts, named-input salvage, executive summary LLM, "
-    "3-tier PDF (Exec Summary / Part 1 Deliverables / Part 2 Appendix)."
+    "3-tier PDF (Exec Summary / Part 1 Deliverables / Part 2 Appendix). Prompts are "
+    "inlined directly in LLM task messages."
 )
 
 # ---------------------------------------------------------------------------
@@ -233,8 +234,8 @@ EXEC_SUMMARY_TASK = {
     "taskReferenceName": "executive_summary",
     "type": "LLM_CHAT_COMPLETE",
     "inputParameters": {
-        "llmProvider": "anthropic",
-        "model": "claude-sonnet-4-5",
+        "llmProvider": "${normalize_intake.output.result.llm_provider}",
+        "model": "${normalize_intake.output.result.llm_model}",
         "maxTokens": 8000,
         "messages": [
             {"role": "system", "message": EXEC_SUMMARY_SYSTEM},
@@ -578,6 +579,7 @@ def patch_tail(wf):
             ip = t.get("inputParameters", {})
             ip["bundle"] = "${bundle_artifacts.output.result}"
             ip["summary"] = "${executive_summary.output.result}"
+            ip["expression"] = "function e() { return { decision: 'approve', bundle: $.bundle, summary: $.summary }; } e();"
             ip.pop("artifact", None)
 
     wf["tasks"] = new_tasks
@@ -688,6 +690,17 @@ def patch_mode_routing(wf):
     print(f"mode routing: 3 cases wired, discovery_normalize in place, {replaced} refs updated")
 
 
+def patch_normalize_intake(wf):
+    """Ensure normalize_intake reads model/provider from workflow input, not itself."""
+    for task in wf["tasks"]:
+        if task.get("taskReferenceName") == "normalize_intake":
+            params = task.setdefault("inputParameters", {})
+            params["llm_provider"] = "${workflow.input.llm_provider}"
+            params["llm_model"] = "${workflow.input.llm_model}"
+            return True
+    return False
+
+
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
@@ -704,6 +717,8 @@ def main():
     patch_tail(wf)
     print(f"tail rebuilt (exec_summary, render, sanitize, generate_pdf)")
     patch_mode_routing(wf)
+    normalize_patched = patch_normalize_intake(wf)
+    print(f"normalize_intake model/provider wiring patched: {normalize_patched}")
 
     wf["outputParameters"] = {
         "final_bundle": "${bundle_artifacts.output.result}",

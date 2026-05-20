@@ -15,7 +15,7 @@ The differentiator is the **panel of six marketing legends** — Don Draper, Ste
 ### 1.1 Design principles
 
 1. **Disagreement > consensus.** Six perspectives that argue produce sharper strategy than one that smooths to averages. The bundle preserves every panel disagreement in Part 2 (the appendix).
-2. **Personas as operating systems.** Each persona is a markdown file with structured fields the workflow applies mechanically. LLM tasks don't get "be Draper" instructions — they get "apply only these `evaluation_questions`; refuse any rewrite that violates `anti_patterns`."
+2. **Personas as operating systems.** Each persona is a markdown file with structured fields that define the persona contract. The current v1 workflow embeds distilled persona rules directly in task prompts; those prompts should be kept aligned with the markdown contract.
 3. **Operator decides.** Strategic forks are preserved as choices, never auto-resolved. The skill never decides for the operator on a real tradeoff.
 4. **Audit-friendly.** Every line of the executive summary traces back through a decisions log to a panel critique or a recorded fork.
 5. **OSS-portable.** The skill must run end-to-end on Conductor OSS without proprietary plumbing — no external prompt registry, no proprietary search APIs, no commercial-only task types.
@@ -120,18 +120,18 @@ All four register via `PUT /api/metadata/workflow` (PUT-array upsert; see §10.4
 
 Six markdown files in `references/personas/`, one per maverick: `draper.md`, `jobs.md`, `ogilvy.md`, `clow.md`, `halbert.md`, `dunford.md`.
 
-Each file has YAML frontmatter (name, era, domain, b2b_fit, b2c_fit, panel_role) and structured sections the workflow LLM tasks read **by section name**:
+Each file has YAML frontmatter (name, era, domain, b2b_fit, b2c_fit, panel_role) and structured sections that define what the workflow prompts should apply:
 
 | Section | Content | How the workflow uses it |
 |---|---|---|
-| `operating_principles` | The persona's worldview as ~7 numbered claims. | Loaded into every panel-task prompt as the persona's foundational frame. |
-| `evaluation_questions` | The ~6 questions this persona asks every artifact. | The ICP / positioning panel task is instructed to *apply only these questions* — not to vibe-channel the persona. |
-| `signature_moves` | Reusable techniques (Draper's "it's toasted" reframe, Halbert's offer-first structure). | The asset-generation prompt for each voice references the signature_moves of that voice. |
-| `anti_patterns` | What this persona *refuses* — corporate jargon for Halbert, feature comparisons for Jobs, etc. | The asset-generation prompt is instructed to refuse any rewrite that violates the voice's anti_patterns. |
-| `voice_samples` | 2–3 short writing samples in the persona's voice. | The judge LLM (§6.6) uses these to identify which variant is most faithful. |
-| `panel_contribution` | One paragraph on what this persona uniquely brings. | Loaded into the synthesis prompt as the panel-balance context. |
+| `operating_principles` | The persona's worldview as ~7 numbered claims. | Source material for panel-task prompt rules. |
+| `evaluation_questions` | The ~6 questions this persona asks every artifact. | Source material for ICP / positioning critique instructions. |
+| `signature_moves` | Reusable techniques (Draper's "it's toasted" reframe, Halbert's offer-first structure). | Source material for asset-generation voice instructions. |
+| `anti_patterns` | What this persona *refuses* — corporate jargon for Halbert, feature comparisons for Jobs, etc. | Source material for refusal and anti-messaging rules. |
+| `voice_samples` | 2–3 short writing samples in the persona's voice. | Source material for judge and voice-fidelity prompts. |
+| `panel_contribution` | One paragraph on what this persona uniquely brings. | Source material for the synthesis prompt's panel-balance context. |
 
-The structured-fields approach is what makes the panel produce distinguishable outputs. If you write "be Draper" in the prompt, you get vague AI-generated copy that resembles every other persona. If you write "apply only `evaluation_questions` and refuse anything in `anti_patterns`," you get arguably-Draper.
+The structured-fields approach is what makes the panel produce distinguishable outputs. If you write "be Draper" in the prompt, you get vague AI-generated copy that resembles every other persona. If you write "apply these concrete evaluation questions and refuse these anti-patterns," you get arguably-Draper. In v1, those rules are embedded in workflow JSON task messages rather than read dynamically from markdown at runtime.
 
 ### 3.4 Prompt templates
 
@@ -149,7 +149,7 @@ Per-phase prompts in `references/prompt-templates/`:
 | `bundle-artifacts.txt` | (legacy — bundle is now an INLINE graaljs merge; see §6.7) |
 | `persona-panel-critique.txt` | (used by panels via `panel_contribution`). |
 
-All prompts are **inlined into the workflow JSON via `allowRawPrompts: true`** at `inputParameters.messages`. There is no Conductor prompt registry, no `setup_prompts.sh`. This keeps the workflow self-contained and OSS-portable.
+All prompts are **inlined directly into the workflow JSON** at `inputParameters.messages`. There is no Conductor prompt registry, no `setup_prompts.sh`. This keeps the workflow self-contained and OSS-portable.
 
 ---
 
@@ -327,7 +327,7 @@ icp_panel (FORK_JOIN)
 icp_join (JOIN)
 ```
 
-Each branch sees the same inputs (discovery output + intake product + ICP hypothesis) but its prompt loads only **its persona's** `operating_principles`, `evaluation_questions`, and `panel_contribution`. The branches don't see each other's outputs; the join collects all six.
+Each branch sees the same inputs (discovery output + intake product + ICP hypothesis) but its prompt embeds only that persona's distilled rules. The branches don't see each other's outputs; the join collects all six.
 
 The branches run in parallel — typical wall-clock is 1–2 minutes for the whole panel regardless of how many personas (limited by the slowest single call).
 
@@ -407,7 +407,7 @@ artifact_generation (FORK_JOIN — 4 branches, one per asset)
    └── asset_outbound_sequences_variants ... + outbound_sequences_judge
 ```
 
-Each variant is generated by an LLM call whose system prompt loads only its voice's `signature_moves` and `anti_patterns`. The judge sees all three variants and the relevant `voice_samples` for each persona; it picks the strongest and emits the winner's text plus a one-line reason.
+Each variant is generated by an LLM call whose prompt embeds the relevant voice rules. The judge sees all three variants and voice guidance for each persona; it picks the strongest and emits the winner's text plus a one-line reason.
 
 The bundle preserves all three variants per asset, not just the judge's pick — operators sometimes want the Halbert version of a Dunford-judged landing page for outbound re-engagement, or want to A/B the picks across voices.
 
@@ -461,7 +461,7 @@ The reason there's **no `enrich_bundle` step** that merges bundle + summary befo
 
 ## 7. Persona-as-operating-system contract
 
-Each persona file is markdown with YAML frontmatter and seven named sections. The workflow reads sections **by name** — never positionally — so the order in the markdown file doesn't matter.
+Each persona file is markdown with YAML frontmatter and seven named sections. Treat these files as the source contract for persona behavior. The current v1 workflow does not read them dynamically at runtime; it embeds distilled persona rules in workflow task messages.
 
 ```markdown
 ---
@@ -499,14 +499,14 @@ panel_role: B2B operational rigor
 Dunford forces the panel through her five-component canvas...
 ```
 
-**Why YAML frontmatter and named sections instead of a JSON schema?** Personas need to be hand-editable by non-engineers. Frontmatter + markdown headers is the lowest-friction format. The workflow prompts include "extract section `operating_principles` from the file at `references/personas/dunford.md`" rather than expecting a strict JSON.
+**Why YAML frontmatter and named sections instead of a JSON schema?** Personas need to be hand-editable by non-engineers. Frontmatter + markdown headers is the lowest-friction format. The workflow prompt content should be updated from these sections whenever persona behavior changes.
 
 **Why this works.** When you tell an LLM "be Draper" it returns vague AI-generated copy. When you tell an LLM "apply these six specific `evaluation_questions` and refuse any output that violates these eight `anti_patterns`," the output is structurally constrained. The persona becomes a filter, not a costume.
 
 ### 7.1 Adding a new persona
 
 1. Drop a file at `references/personas/<name>.md` matching the structure above.
-2. Add the persona to both the `icp_panel` and `positioning_panel` FORK_JOIN branches in `references/workflow-definitions/gtm_mavericks_v1.json`. Each branch is an `LLM_CHAT_COMPLETE` task with `inputParameters.messages` that loads the persona's fields by file path.
+2. Add the persona to both the `icp_panel` and `positioning_panel` FORK_JOIN branches in `references/workflow-definitions/gtm_mavericks_v1.json`. Each branch is an `LLM_CHAT_COMPLETE` task with `inputParameters.messages` that must embed the persona's distilled rules.
 3. Optionally add the persona to the asset variants list (`asset_*_<name>` tasks) and the judge prompt's voice list — required if you want their voice considered for asset generation.
 4. Re-register the workflow: `./gtm-mavericks/scripts/register_workflows.sh`.
 
@@ -514,7 +514,7 @@ A 7th persona doesn't require a workflow version bump unless you change task str
 
 ### 7.2 Editing an existing persona
 
-`signature_moves` and `anti_patterns` are the highest-leverage sections to edit. Changes apply to the next run; no workflow re-registration required because the persona files are read at prompt-render time, not workflow-registration time.
+`signature_moves` and `anti_patterns` are the highest-leverage sections to edit. In v1, changes must be propagated into `gtm_mavericks_v1.json` and workflows must be re-registered before they affect a run.
 
 ---
 
@@ -880,7 +880,7 @@ Major design decisions, the alternative considered, and why we picked the curren
 |---|---|---|
 | Conductor workflow over single Python script | Single Anthropic API call orchestrating tool use | Durability (survives client restarts), built-in retries, parallel FORK_JOIN, native PDF task, observable state. |
 | `LLM_CHAT_COMPLETE` + `webSearch: true` for discovery | External search API (Brave / Google CSE) | One-step LLM-native research, citable URLs, no extra API key. Reduces moving parts. |
-| Inlined prompts (`allowRawPrompts: true`) | Conductor prompt registry | OSS-portable (no registry config), self-contained workflow JSON. Trade-off: re-register on prompt change. |
+| Inlined task-message prompts | Conductor prompt registry | OSS-portable (no registry config), self-contained workflow JSON. Trade-off: re-register on prompt change. |
 | Personas as markdown + structured sections | JSON schema with strict typing | Hand-editable by non-engineers. Markdown is the universal format. |
 | Six personas | Three or four | Each persona brings a non-overlapping evaluation question set. Below 6 we lose B2B/B2C balance; above 6 the panel cost balloons without proportional quality gain. |
 | `INLINE` gates instead of `HUMAN` tasks | HUMAN tasks with skill signaling | OSS Conductor HUMAN-task signaling is unreliable (404s on multiple signal endpoints). INLINE gates + opportunistic skill review work today. |

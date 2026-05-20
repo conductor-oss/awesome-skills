@@ -1,7 +1,7 @@
 {
   "name": "discovery_new_product",
   "version": 1,
-  "description": "Deep-research GTM discovery for a NEW product launch. Uses Anthropic webSearch + user-supplied corpus URL fetch. Same shape as discovery_reposition v8 but with launch-focused prompt.",
+  "description": "Deep-research GTM discovery for a NEW product launch. Uses Anthropic webSearch + user-supplied corpus URL fetch. Same shape as discovery_reposition v1 but with launch-focused prompt.",
   "ownerEmail": "viren@orkes.io",
   "schemaVersion": 2,
   "inputParameters": [

@@ -1,7 +1,7 @@
 {
   "name": "gtm_mavericks_v1",
   "version": 1,
-  "description": "GTM Mavericks main workflow: routes mode A/B/C to a discovery sub-workflow, runs persona panels + Socratic synthesis loops for ICP/positioning/messaging, generates assets in 3 voices with a judge LLM, then bundles, summarizes, renders markdown and PDF in-Conductor. All prompts inlined via allowRawPrompts.",
+  "description": "GTM Mavericks v1: all three modes wired (reposition/new_product/campaign) via discovery_normalize INLINE passthrough. webSearch deep research, Socratic probe, iteration-aware synthesis prompts, named-input salvage, executive summary LLM, 3-tier PDF (Exec Summary / Part 1 Deliverables / Part 2 Appendix). Prompts are inlined directly in LLM task messages.",
   "ownerEmail": "viren@orkes.io",
   "schemaVersion": 2,
   "timeoutPolicy": "ALERT_ONLY",
@@ -36,8 +36,8 @@
         "product_name": "${workflow.input.product_name}",
         "product_description": "${workflow.input.product_description}",
         "product_url": "${workflow.input.product_url}",
-        "llm_provider": "${normalize_intake.output.result.llm_provider}",
-        "llm_model": "${normalize_intake.output.result.llm_model}"
+        "llm_provider": "${workflow.input.llm_provider}",
+        "llm_model": "${workflow.input.llm_model}"
       }
     },
     {
@@ -1174,7 +1174,7 @@
       "type": "INLINE",
       "inputParameters": {
         "evaluatorType": "graaljs",
-        "expression": "function e() { return { decision: 'approve', artifact: $.artifact }; } e();",
+        "expression": "function e() { return { decision: 'approve', bundle: $.bundle, summary: $.summary }; } e();",
         "bundle": "${bundle_artifacts.output.result}",
         "summary": "${executive_summary.output.result}"
       }

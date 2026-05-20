@@ -35,7 +35,7 @@ if [ -n "${CONDUCTOR_AUTH_KEY:-}" ] && [ -n "${CONDUCTOR_AUTH_SECRET:-}" ]; then
       warn "Failed to mint auth token; proceeding without auth (OSS Conductor)."
     }
   if [ -n "$TOKEN_RESP" ]; then
-    TOKEN=$(echo "$TOKEN_RESP" | python3 -c "import json,sys; print(json.load(sys.stdin).get('token',''))")
+    TOKEN=$(printf "%s" "$TOKEN_RESP" | node -e 'let s=""; process.stdin.on("data", d => s += d); process.stdin.on("end", () => { try { process.stdout.write(JSON.parse(s).token || ""); } catch (_) {} });')
     if [ -n "$TOKEN" ]; then
       AUTH_HEADER="-H X-Authorization:$TOKEN"
       ok "Auth token minted"
@@ -51,13 +51,13 @@ for f in discovery_new_product.json discovery_reposition.json discovery_campaign
     fail "Workflow definition missing: $path"
     exit 1
   fi
-  name=$(python3 -c "import json; print(json.load(open('$path'))['name'])")
-  version=$(python3 -c "import json; print(json.load(open('$path')).get('version', 1))")
+  name=$(node -e 'const fs = require("fs"); const wf = JSON.parse(fs.readFileSync(process.argv[1], "utf8")); process.stdout.write(wf.name);' "$path")
+  version=$(node -e 'const fs = require("fs"); const wf = JSON.parse(fs.readFileSync(process.argv[1], "utf8")); process.stdout.write(String(wf.version || 1));' "$path")
   info "Registering $name v$version..."
   # Stream the JSON (wrapped in a 1-element array, per the PUT endpoint contract)
   # via stdin rather than `-d "[$(cat ...)]"` — the latter hits ARG_MAX on Linux
   # for the ~297KB main workflow file ("Argument list too long").
-  RESPONSE=$(python3 -c "import json,sys; json.dump([json.load(open('$path'))], sys.stdout)" \
+  RESPONSE=$(node -e 'const fs = require("fs"); const wf = JSON.parse(fs.readFileSync(process.argv[1], "utf8")); process.stdout.write(JSON.stringify([wf]));' "$path" \
     | curl -fsS -w "\n%{http_code}" -X PUT $AUTH_HEADER -H "Content-Type: application/json" \
         --data-binary @- \
         "$CONDUCTOR_SERVER_URL/metadata/workflow") || {

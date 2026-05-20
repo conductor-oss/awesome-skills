@@ -294,7 +294,7 @@ fi
 WFDIR="$(dirname "$0")/../references/workflow-definitions"
 for f in gtm_mavericks_v1.json discovery_new_product.json discovery_reposition.json discovery_campaign.json; do
   if [ -f "$WFDIR/$f" ]; then
-    if python3 -c "import json,sys; json.load(open('$WFDIR/$f'))" 2>/dev/null; then
+    if node -e 'JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"))' "$WFDIR/$f" 2>/dev/null; then
       ok "Workflow definition parses: $f"
     else
       fail "Workflow definition invalid JSON: $f"

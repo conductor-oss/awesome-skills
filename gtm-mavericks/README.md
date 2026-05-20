@@ -54,7 +54,7 @@ Each persona is a structured operating system in `references/personas/<name>.md`
 | **Gary Halbert** | Offer plus urgency plus proof plus P.S. "Dear Friend..." Direct-response. | DTC, info products, outbound |
 | **April Dunford** | Five-component canvas. Sales-narrative test. Names the actual alternative the buyer is considering. | B2B SaaS |
 
-Each file has structured fields the workflow reads by name: `operating_principles`, `evaluation_questions`, `signature_moves`, `anti_patterns`, `voice_samples`, `panel_contribution`. The LLM tasks don't get a "be Draper" instruction — they get *"apply only these evaluation_questions; refuse any rewrite that violates anti_patterns."*
+Each file has structured fields that define the persona contract: `operating_principles`, `evaluation_questions`, `signature_moves`, `anti_patterns`, `voice_samples`, `panel_contribution`. In the current v1 workflow, the task prompts embed distilled persona rules directly, so persona edits must be propagated into the workflow JSON before re-registering.
 
 ## A real disagreement
 
@@ -135,9 +135,9 @@ The skill file format (markdown + YAML frontmatter) is portable. Tool-name conve
 
 **Workflow definitions** — `references/workflow-definitions/` — four Conductor workflows: a 25-task main workflow plus three mode-specific discovery sub-workflows. All ship ready to register via `PUT /api/metadata/workflow`.
 
-**Personas** — `references/personas/` — six maverick files with structured fields. Plain markdown, hand-editable. The workflow LLM tasks reference them by file path.
+**Personas** — `references/personas/` — six maverick files with structured fields. Plain markdown, hand-editable. They are the editing contract for the persona library; the current workflow JSON embeds distilled persona rules in task prompts.
 
-**Prompt templates** — `references/prompt-templates/` — per-phase prompts inlined into workflow JSON via `allowRawPrompts: true`, so there's no external prompt registry to manage.
+**Prompt templates** — `references/prompt-templates/` — per-phase prompts inlined directly into workflow JSON task messages, so there's no external prompt registry to manage.
 
 **Output templates** — `references/output-templates/` — Mustache-style markdown templates for each artifact type plus the full 3-tier doc and Marp slide deck.
 
@@ -156,7 +156,7 @@ The skill file format (markdown + YAML frontmatter) is portable. Tool-name conve
 
 ## Customization
 
-**Edit a persona.** Open the markdown file at `references/personas/<name>.md`. Change `signature_moves`, sharpen `anti_patterns`, add `voice_samples`. Changes apply to the next run.
+**Edit a persona.** Open the markdown file at `references/personas/<name>.md`. Change `signature_moves`, sharpen `anti_patterns`, add `voice_samples`, then propagate those changes into the matching prompts in `references/workflow-definitions/gtm_mavericks_v1.json` and re-register workflows. The current v1 workflow does not read persona markdown files dynamically at runtime.
 
 **Add a 7th persona.** Drop a file at `references/personas/<name>.md` matching `draper.md`'s schema. Add the new persona to both the `icp_panel` and `positioning_panel` forks in `references/workflow-definitions/gtm_mavericks_v1.json`. Re-register with `./scripts/register_workflows.sh`.
 
