@@ -54,9 +54,13 @@ for f in discovery_new_product.json discovery_reposition.json discovery_campaign
   name=$(python3 -c "import json; print(json.load(open('$path'))['name'])")
   version=$(python3 -c "import json; print(json.load(open('$path')).get('version', 1))")
   info "Registering $name v$version..."
-  RESPONSE=$(curl -fsS -w "\n%{http_code}" -X PUT $AUTH_HEADER -H "Content-Type: application/json" \
-    -d "[$(cat "$path")]" \
-    "$CONDUCTOR_SERVER_URL/metadata/workflow") || {
+  # Stream the JSON (wrapped in a 1-element array, per the PUT endpoint contract)
+  # via stdin rather than `-d "[$(cat ...)]"` — the latter hits ARG_MAX on Linux
+  # for the ~297KB main workflow file ("Argument list too long").
+  RESPONSE=$(python3 -c "import json,sys; json.dump([json.load(open('$path'))], sys.stdout)" \
+    | curl -fsS -w "\n%{http_code}" -X PUT $AUTH_HEADER -H "Content-Type: application/json" \
+        --data-binary @- \
+        "$CONDUCTOR_SERVER_URL/metadata/workflow") || {
       fail "$name v$version: registration failed"
       echo "$RESPONSE"
       exit 1
