@@ -2,7 +2,7 @@
 
 ## Six legendary marketers walk into a workflow. They argue. The disagreements are preserved.
 
-gtm-mavericks is a skill for your coding agent that runs your go-to-market strategy through a debate panel of six marketing legends — Don Draper, Steve Jobs, David Ogilvy, Lee Clow, Gary Halbert, and April Dunford. They critique your ICP. They fight over positioning. They only commit to one voice when you say so. The output is ship-ready: ICP, positioning, messaging house, sales playbook, landing copy, ad copy, outbound sequences — plus a PDF that preserves every strategic disagreement as an appendix.
+gtm-mavericks is a skill for your coding agent that runs your go-to-market strategy through a debate panel of six marketing legends — Don Draper, Steve Jobs, David Ogilvy, Lee Clow, Gary Halbert, and April Dunford. They critique your ICP. They fight over positioning. Disagreements are preserved as strategic forks rather than smoothed away. The output is ship-ready: ICP, positioning, messaging house, sales playbook, landing copy, ad copy, outbound sequences — plus a PDF that preserves every strategic disagreement as an appendix.
 
 Built for marketers tired of AI-generated GTM that all sounds the same.
 
@@ -18,11 +18,11 @@ Then the panel kicks in. Six personas, each in their own parallel LLM task, each
 
 A synthesis loop runs after each panel — draft, Socratic adversarial probe, revised draft, again — until the probe returns satisfied or hits the configured iteration cap. Disagreements that don't resolve become **strategic forks** in the output: concrete tradeoffs with real consequences (CAC payback, claim rate, AOV) rather than "more emotional vs. more rational."
 
-Each phase pauses for you in chat: approve, revise, or reject. You don't see workflow IDs. You don't see JSON. You see the artifact and you say yes or no.
+The workflow runs end-to-end in 30–60 minutes without supervision. You can review artifacts opportunistically — ask "show me the ICP" mid-run and the skill surfaces whatever the synthesis loop has produced so far. If you actually want to halt for review, say "pause" and the skill calls `conductor workflow pause` so nothing advances until you resume. You never see workflow IDs or raw JSON; the skill translates state into plain English.
 
-Once positioning is locked, you pick *one* voice for asset generation. The workflow runs three voice variants per asset (Dunford / Halbert / Ogilvy by default) and a judge LLM composes the per-item bests. Then it bundles everything into a PDF that Conductor generates natively — no local LaTeX, no pandoc.
+Asset generation runs all three voices in parallel — Dunford, Halbert, Ogilvy — for every asset, and a judge LLM picks the strongest variant per item. The bundle carries the judge's picks; the other variants stay in the appendix so you can compare. Then everything gets rendered to a 3-tier markdown + PDF inside Conductor — no local LaTeX, no pandoc.
 
-You can walk away at any point. Conductor holds the state. Come back hours or days later and ask "where are we?" — the skill reads `.gtm/active-run`, queries Conductor, and translates the workflow's current task into plain English.
+You can walk away at any point. Conductor holds the state. Come back hours or days later and ask "where are we?" — the skill reads each `.gtm/runs/<run-id>/state.json`, queries Conductor, and translates the current task into plain English. Multiple concurrent runs are supported; disambiguate by product name ("status for FlightCalm").
 
 **Why this works:** No human carries Draper, Jobs, Ogilvy, Clow, Halbert, *and* Dunford in their head simultaneously. A workflow can. The result is strategy with all six lenses applied — sharper than any single PMM's output, even a great one, because no individual avoids their own blind spots. The preserved strategic forks force the operator to make the real calls rather than smoothing them away.
 
@@ -85,41 +85,41 @@ Paste any of these into your agent. The intake wizard takes it from there, one q
 > we sell Hublink. $8M ARR Series B. Win rate dropped 15% YoY against Linear/Notion. Demos land, deals stall. Reposition.
 
 **Launch campaign with positioning already set:**
-> Earnpay Advance — instant earned-wage access for hourly workers in 12 states. Positioning fixed. Need messaging house + landing + ad copy + outbound sequence. Use Halbert voice.
+> Earnpay Advance — instant earned-wage access for hourly workers in 12 states. Positioning is already fixed and approved. Run the campaign mode.
 
 **Mid-run check-in:**
 > where are we on the gtm run?
 
-**Force a specific persona voice:**
-> use Draper for asset voice. Headlines, not bullet lists.
+**Halt for review:**
+> pause the run, I want to look at the ICP before positioning starts
 
 **Pause and resume across sessions:**
 > pause the run, I'll be back tomorrow
 >
 > *(next day, fresh session)* — where were we?
 
-**Iterate on positioning without re-running everything:**
-> the positioning we just landed is good but I want to test a category-creation play. Re-run positioning with that frame.
+**Compare voice variants from a finished run:**
+> show me the Halbert variant of the landing copy — I want to compare it to what the judge picked
 
-**Short-circuit a fast run:**
-> give me messaging house + landing + 3 ad variants for ProductX, voice: Dunford. Skip the long synthesis loops.
+**Run something new with a sharper angle:**
+> the positioning from yesterday's run is fine but I want to test a category-creation play. Start a fresh run with that frame.
 
 ## What you get
 
 When a run completes, deliverables land in `gtm-output/<run-id>/`:
 
 - **`gtm-full.md`** + **`gtm-full.pdf`** — the assembled 3-tier doc: Executive Summary → Part 1 Deliverables → Part 2 Appendix (panel disagreements and decisions log). PDF generated server-side, no local LaTeX needed.
-- **`bundle.json`** — all artifacts as structured JSON for downstream tooling.
+- **`bundle.json`** — all artifacts as structured JSON for downstream tooling, including the non-winning voice variants for each asset.
 - **`executive_summary.json`** — TL;DR, key decisions, 90-day action plan, KPIs, gaps and risks.
-- **`gtm-deck.pdf`** / **`gtm-deck.html`** — if Marp is installed and slides were requested.
+- **`gtm-deck.pdf`** / **`gtm-deck.html`** — only if you ask for them after the run. Slides are a separate post-run render via `scripts/render_slides.sh` (requires marp).
 
-The PDF preserves the panel's disagreements as an appendix. Every line in the executive summary traces back through the decisions log to either *"the panel agreed"* or *"you chose option A at the positioning gate."* Audit-friendly strategy.
+The PDF preserves the panel's disagreements as an appendix. Every line in the executive summary traces back through the decisions log to a recorded panel critique or strategic fork. Audit-friendly strategy.
 
 ## Agent compatibility
 
 | Agent | Experience | Skill path |
 |---|---|---|
-| **Claude Code** | Full skill + intake wizard + conversational gates | `~/.claude/skills/gtm-mavericks/` |
+| **Claude Code** | Full skill + intake wizard + opportunistic artifact review | `~/.claude/skills/gtm-mavericks/` |
 | **Codex CLI** | Full skill | `~/.codex/skills/gtm-mavericks/` |
 | **Gemini CLI** | Full skill | `~/.gemini/skills/gtm-mavericks/` |
 | **OpenCode** | Full skill | `~/.config/opencode/skills/gtm-mavericks/` |
@@ -129,7 +129,9 @@ The skill file format (markdown + YAML frontmatter) is portable. Tool-name conve
 
 ## What's inside
 
-**Core skill** — [`SKILL.md`](SKILL.md) — conversational orchestrator. Runs intake, surfaces phase artifacts as chat gates, signals Conductor on user response, renders final outputs.
+**Core skill** — [`SKILL.md`](SKILL.md) — conversational orchestrator. Runs intake, launches the workflow, translates status to plain English on request, surfaces in-progress artifacts when asked, pauses or terminates the run on the user's command, and renders final outputs at completion.
+
+**Design doc** — [`docs/design/architecture.md`](docs/design/architecture.md) — engineering reference covering system architecture, workflow internals (mode routing, synthesis loops, 3-voice judge, polyglot proxy workarounds), persona contract, concurrency model, test strategy, limitations, and decision log. Read this before extending the workflow or debugging anything non-obvious.
 
 **Workflow definitions** — `references/workflow-definitions/` — four Conductor workflows: a 25-task main workflow plus three mode-specific discovery sub-workflows. All ship ready to register via `PUT /api/metadata/workflow`.
 
@@ -148,7 +150,7 @@ The skill file format (markdown + YAML frontmatter) is portable. Tool-name conve
 - **Disagreement > consensus.** Six perspectives that argue produce sharper strategy than one that smooths to averages.
 - **Personas as operating systems.** Encoded as structured fields the workflow applies mechanically, not vibes.
 - **Operator decides.** Strategic forks are preserved as choices, never auto-resolved.
-- **One voice ships.** At the asset gate, you commit to one persona's voice for the whole campaign.
+- **Three voices per asset, judged.** Every asset is drafted in three voices in parallel and a judge LLM composes the strongest. The losing variants stay in the bundle for comparison rather than being thrown away.
 - **Audit-friendly.** Every line of output traces back to a panel critique or a recorded decision.
 - **Substance over style.** The maverick framing only works because the underlying GTM rigor is real.
 

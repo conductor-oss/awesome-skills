@@ -12,9 +12,8 @@ A solo founder is launching a new app that helps anxious frequent flyers manage 
 2. *Product?* → "FlightCalm is an iOS app that uses Apple Watch heart-rate variability to trigger personalized breathing exercises mid-flight for people with flight anxiety."
 3. *Buyer?* → "Frequent flyers with flight anxiety, mid-30s to mid-50s, business travelers mostly."
 4. *Materials?* → 4 interview transcripts in `./inputs/interviews/`, 1 concept doc.
-5. *Deliverables?* → Default (ICP, positioning, messaging house, sales playbook, outbound sequences, landing copy).
-6. *Output?* → All three formats.
-7. *Notifications?* → No.
+5. *Model?* → Balanced (claude-sonnet-4-6).
+6. *Refinement passes?* → 3 (default).
 
 ## What "looks right" at each phase
 
@@ -41,17 +40,13 @@ Expect a clear fork between:
 
 The user should have to actually pick — both have real tradeoffs.
 
-### Asset voice
-
-For B2C consumer wellness: recommend Draper or Clow. The skill should surface this as a recommendation but let the user override.
-
 ### Assets
 
-If user picked Draper: landing copy reads emotionally — feeling-first headlines, no feature bullets above the fold. Outbound sequences (if any) lean on emotional reframes.
+Every asset is generated in three voices in parallel — Dunford, Halbert, Ogilvy — and a judge LLM picks the strongest per asset. For B2C consumer wellness like FlightCalm, the judge will typically pick Halbert for the landing page (offer-first: "First flight, free, anxiety-guaranteed or your money back") and Halbert or Ogilvy for outbound (emotional reframe + proof).
 
-If user picked Halbert: landing copy is offer-first ("First flight free anxiety guaranteed or your money back").
+The losing variants stay in `bundle.json` for comparison. If the user wants a more lifestyle-led B2C voice (Draper or Clow), that's a workflow-def edit, not an intake field — see the customization section in the main README.
 
-The voice should be *distinguishable* — that's the test.
+The voices should be *distinguishable* — that's the test. Compare a Dunford landing-page draft against a Halbert one for the same product; if they read the same, something is broken.
 
 ## Pass criteria
 

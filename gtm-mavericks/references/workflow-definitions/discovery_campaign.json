@@ -7,7 +7,9 @@
   "inputParameters": [
     "product",
     "icp_hypothesis",
-    "corpus"
+    "corpus",
+    "llm_provider",
+    "llm_model"
   ],
   "outputParameters": {
     "discovery": "${synthesize_discovery.output.result}",
@@ -56,8 +58,8 @@
       "taskReferenceName": "synthesize_discovery",
       "type": "LLM_CHAT_COMPLETE",
       "inputParameters": {
-        "llmProvider": "anthropic",
-        "model": "claude-sonnet-4-5",
+        "llmProvider": "${workflow.input.llm_provider}",
+        "model": "${workflow.input.llm_model}",
         "maxTokens": 12000,
         "messages": [
           {

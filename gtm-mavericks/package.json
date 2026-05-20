@@ -1,7 +1,7 @@
 {
   "name": "@conductor-skills/gtm",
-  "version": "0.1.0",
-  "description": "GTM Mavericks — a Claude Code skill that runs deep go-to-market strategy through a Conductor workflow, with a 6-persona panel of marketing mavericks (Draper, Jobs, Ogilvy, Clow, Halbert, Dunford).",
+  "version": "0.2.0",
+  "description": "GTM Mavericks — a Claude Code skill that runs deep go-to-market strategy for any product launch, positioning, or marketing campaign through a Conductor workflow with a 6-persona debate panel (Draper, Jobs, Ogilvy, Clow, Halbert, Dunford). Use for launches, repositioning, GTM strategy, ICP work, positioning, messaging house, sales enablement assets.",
   "keywords": [
     "claude-code",
     "claude-skill",
@@ -34,8 +34,10 @@
   "files": [
     "SKILL.md",
     "README.md",
+    "CHANGELOG.md",
     "plugin.json",
     "bin/",
+    "docs/",
     "references/",
     "scripts/",
     "examples/"
