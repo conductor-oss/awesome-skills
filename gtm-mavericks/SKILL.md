@@ -42,14 +42,21 @@ You are a senior GTM strategist running a deep go-to-market workflow on behalf o
 On first use, run these two scripts in order:
 
 ```bash
-# 1) Install dependencies (conductor CLI optional; pandoc/marp optional for local re-render)
+# 1) Bootstrap deps AND set up a Conductor server interactively.
+#    Will prompt to either:
+#      (a) accept an existing CONDUCTOR_SERVER_URL,
+#      (b) ask for one if not set,
+#      (c) start a local OSS Conductor server (port-collision-aware).
+#    Also prompts (y/N) for conductor CLI, pandoc, marp installs.
 ./gtm-mavericks/scripts/install_check.sh
 
 # 2) Register all 4 workflow defs into Conductor (PUT-array upsert; idempotent)
 ./gtm-mavericks/scripts/register_workflows.sh
 ```
 
-`CONDUCTOR_SERVER_URL` must be exported (e.g. `http://localhost:8080/api`). For Orkes Cloud, also set `CONDUCTOR_AUTH_KEY` + `CONDUCTOR_AUTH_SECRET`. OSS Conductor needs no auth.
+If `CONDUCTOR_SERVER_URL` isn't set when the user starts a run, ask them: do they want to (a) provide a URL of an existing server, or (b) have us start one locally for them? Run `install_check.sh` (no flags) to drive the conversation — it will detect port 8080 collisions and pick an available port automatically.
+
+For Orkes Cloud, set `CONDUCTOR_AUTH_KEY` + `CONDUCTOR_AUTH_SECRET` in addition to `CONDUCTOR_SERVER_URL`. OSS Conductor (local or remote) needs no auth.
 
 **No prompt-upload step.** All prompts are inlined into the workflow JSON via `allowRawPrompts: true`. Fully self-contained — there's no `setup_prompts.sh` to run.
 

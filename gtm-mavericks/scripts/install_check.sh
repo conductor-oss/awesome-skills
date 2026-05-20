@@ -118,14 +118,133 @@ else
   fi
 fi
 
-# --- 3. CONDUCTOR_SERVER_URL (REQUIRED; cannot auto-set) ---
+# --- 3. CONDUCTOR_SERVER_URL — interactive setup ---
+#
+# Three paths: (a) already set & reachable → ok; (b) user provides a URL;
+# (c) start a local server (with port-availability detection).
+
+server_reachable() {
+  # $1: full URL (http://host:port/api). Probes <root>/health (no /api suffix).
+  local url="$1"
+  local root="${url%/api}"
+  curl -fsS --max-time 4 "$root/health" >/dev/null 2>&1
+}
+
+find_free_port() {
+  for p in 8080 8081 8090 9080 18080 28080; do
+    if ! lsof -nP -iTCP:"$p" -sTCP:LISTEN >/dev/null 2>&1; then
+      echo "$p"
+      return 0
+    fi
+  done
+  echo ""
+  return 1
+}
+
+start_local_conductor() {
+  # Returns 0 + sets LOCAL_CONDUCTOR_URL on success; 1 on failure.
+  local port
+  port=$(find_free_port)
+  if [ -z "$port" ]; then
+    fail "No free port found in 8080/8081/8090/9080/18080/28080."
+    return 1
+  fi
+  if [ "$port" != "8080" ]; then
+    info "Port 8080 is busy. Using port $port instead."
+  fi
+  info "Starting Conductor server on port $port (this downloads ~600MB on first run)..."
+  conductor server start --port "$port" >/tmp/conductor-server.log 2>&1 &
+  local start_pid=$!
+  local url="http://localhost:$port/api"
+  for i in $(seq 1 90); do
+    if server_reachable "$url"; then
+      ok "Conductor server is up: $url"
+      LOCAL_CONDUCTOR_URL="$url"
+      return 0
+    fi
+    [ $((i % 6)) -eq 0 ] && info "  …still waiting (attempt $i / 90)…"
+    sleep 5
+  done
+  fail "Conductor server didn't come up within 7.5 minutes."
+  fail "Last 30 lines of /tmp/conductor-server.log:"
+  tail -30 /tmp/conductor-server.log 2>&1 | sed 's/^/    /'
+  return 1
+}
+
+CONDUCTOR_SET=false
+
 if [ -n "${CONDUCTOR_SERVER_URL:-}" ]; then
-  ok "CONDUCTOR_SERVER_URL: $CONDUCTOR_SERVER_URL"
-else
-  fail "CONDUCTOR_SERVER_URL not set."
-  info "Set it for the current shell:  export CONDUCTOR_SERVER_URL=http://localhost:8080/api"
-  info "To persist, add the line to ~/.zshrc or ~/.bashrc."
-  HARD_FAILS=$((HARD_FAILS + 1))
+  if server_reachable "$CONDUCTOR_SERVER_URL"; then
+    ok "CONDUCTOR_SERVER_URL: $CONDUCTOR_SERVER_URL (reachable)"
+    CONDUCTOR_SET=true
+  else
+    warn "CONDUCTOR_SERVER_URL=$CONDUCTOR_SERVER_URL — set but not reachable."
+  fi
+fi
+
+if [ "$CONDUCTOR_SET" = "false" ]; then
+  case "$MODE" in
+    check-only)
+      fail "CONDUCTOR_SERVER_URL not set or not reachable."
+      info "Set it: export CONDUCTOR_SERVER_URL=http://localhost:8080/api"
+      info "Or run interactively to be guided through server setup."
+      HARD_FAILS=$((HARD_FAILS + 1))
+      ;;
+    auto-install)
+      info "auto-install mode → starting a local Conductor server."
+      if start_local_conductor; then
+        CONDUCTOR_SET=true
+      else
+        HARD_FAILS=$((HARD_FAILS + 1))
+      fi
+      ;;
+    interactive)
+      echo ""
+      echo "  This skill needs a Conductor server. Choose:"
+      echo "    1) I have a server — I'll provide the URL"
+      echo "    2) Start a local one for me (downloads ~600MB on first run)"
+      echo "    3) Skip for now (you'll set it up later)"
+      printf "  Choice [1/2/3]: "
+      read -r conductor_choice
+      case "$conductor_choice" in
+        1)
+          printf "  Server URL (default: http://localhost:8080/api): "
+          read -r user_url
+          user_url="${user_url:-http://localhost:8080/api}"
+          if server_reachable "$user_url"; then
+            ok "Reachable. Export this in your shell:"
+            echo ""
+            echo "      export CONDUCTOR_SERVER_URL=\"$user_url\""
+            echo ""
+            info "Then re-run: $0"
+            CONDUCTOR_SET=true
+          else
+            fail "Couldn't reach $user_url/health"
+            info "Check the URL and your network, then re-run."
+            HARD_FAILS=$((HARD_FAILS + 1))
+          fi
+          ;;
+        2)
+          if start_local_conductor; then
+            CONDUCTOR_SET=true
+            echo ""
+            ok "Local server running. To use it, export in your shell:"
+            echo ""
+            echo "      export CONDUCTOR_SERVER_URL=\"$LOCAL_CONDUCTOR_URL\""
+            echo ""
+            info "Add the line to ~/.zshrc (or your shell's rc file) to persist."
+            info "Stop the server later with: conductor server stop"
+          else
+            HARD_FAILS=$((HARD_FAILS + 1))
+          fi
+          ;;
+        *)
+          warn "Skipped. Set CONDUCTOR_SERVER_URL before running the skill."
+          HARD_FAILS=$((HARD_FAILS + 1))
+          ;;
+      esac
+      ;;
+  esac
 fi
 
 # --- 4. pandoc (OPTIONAL; warn-only; auto-install offered) ---

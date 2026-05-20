@@ -86,18 +86,30 @@ Valid IDs: `claude-code`, `claude-code-plugins`, `codex`, `gemini`, `opencode` (
 
 **Note on compatibility:** the skill file format (markdown with YAML frontmatter) is largely portable across these agents, but tool-name conventions differ slightly between platforms (Claude Code's `Bash` vs Codex's equivalents, for example). The `allowed-tools` line in `SKILL.md` is written for Claude Code; on other platforms most tool calls still work but some may need light adaptation. File issues at [`conductoross/awesome-skills`](https://github.com/conductoross/awesome-skills) if you hit a tool-name mismatch.
 
-To finish setup (install Conductor CLI deps and register workflows on your server):
+To finish setup, run the bootstrap. It handles **both** the deps (conductor CLI / pandoc / marp) **and** the Conductor server:
 
 ```bash
-export CONDUCTOR_SERVER_URL="http://localhost:8080/api"   # or your Orkes Cloud URL
-# For Orkes Cloud (authenticated servers):
-export CONDUCTOR_AUTH_KEY="<your-key-id>"
-export CONDUCTOR_AUTH_SECRET="<your-key-secret>"
-
 gtm-install
 ```
 
-`gtm-install` is interactive — it'll prompt before installing the `conductor` CLI, `pandoc`, and `marp`. Re-runnable; safe to retry.
+`gtm-install` is interactive. For each missing piece it asks before doing anything. For the Conductor server specifically, it offers three choices:
+
+1. **You already have a server** — provide the URL (e.g. `http://localhost:8080/api`, or your Orkes Cloud cluster URL).
+2. **Start one locally for me** — the script runs `conductor server start`, checks port 8080 first, and falls back to 8081 / 8090 / 9080 / 18080 if 8080 is taken. The OSS jar (~600 MB) downloads once on first run. After boot, the script prints the `export CONDUCTOR_SERVER_URL=...` line for you to add to your shell rc file.
+3. **Skip for now** — useful if you only want to install the skill files and configure later.
+
+Re-runnable and idempotent. If you set `CONDUCTOR_SERVER_URL` ahead of time, the prompt is skipped.
+
+For **Orkes Cloud** (authenticated remote servers), set the auth env vars yourself before `gtm-install`:
+
+```bash
+export CONDUCTOR_SERVER_URL="https://<your-cluster>.orkesconductor.io/api"
+export CONDUCTOR_AUTH_KEY="<your-key-id>"
+export CONDUCTOR_AUTH_SECRET="<your-key-secret>"
+gtm-install
+```
+
+For **OSS Conductor** (local or self-hosted), no auth is needed.
 
 To remove:
 
@@ -200,6 +212,60 @@ where are we on the gtm run?
 ```
 
 The skill reads `.gtm/active-run`, queries Conductor, and gives you a plain-English summary plus any pending gate.
+
+---
+
+## Examples — prompts you can paste
+
+Copy any of these into Claude (or whichever agent you use) to trigger the skill. The skill will run the intake wizard from there, one question at a time.
+
+### 1. New product, no traction yet (Mode A)
+
+> Let's run a gtm for a new product. I'm building **FlightCalm** — an iOS app that uses Apple Watch heart-rate variability to trigger personalized breathing exercises mid-flight for people with flight anxiety. No traction yet. I have 4 interview transcripts in `~/Desktop/flightcalm/interviews/` and a one-pager concept doc.
+
+What happens: intake wizard → Mode A confirmed → discovery (with corpus + web search) → ICP panel → ICP gate → positioning panel → positioning gate → messaging house → asset voice gate → assets → bundle + PDF.
+
+### 2. Repositioning a B2B SaaS that hit a plateau (Mode B)
+
+> We sell **Hublink** — async-first team workspace. $8M ARR, Series B. Win rate dropped 15% YoY against Linear/Notion. Demos land but deals stall. We need to reposition. I'm uploading lost-deal transcripts and current website copy. Run a full repositioning.
+
+What happens: Mode B → discovery focused on current-positioning audit + lost-deal patterns → 6-persona ICP panel that argues over who the *real* buyer is now → positioning panel surfaces "broaden vs narrow the category" forks → messaging house with anti-messaging that names what to stop saying → assets in Dunford's voice (B2B operational default).
+
+### 3. Launch campaign with positioning already set (Mode C)
+
+> Launch campaign for **Earnpay Advance** — instant earned-wage access for hourly workers, just approved in 12 states. Positioning is set: "Cash you've earned, before payday — no fees, no credit check, no debt." Buyers are 22-38 hourly workers earning $15-25/hr at retail/food service. I need messaging house, landing copy, ad copy variants, and a 4-email outbound sequence in Halbert's direct-response voice.
+
+What happens: Mode C → skips ICP/positioning debate → discovery focused on channels + trigger events → messaging house → voice pick (Halbert recommended for direct-response) → 4 assets generated in his voice → bundle + PDF.
+
+### 4. Mid-run check-in
+
+> Where are we on the GTM run?
+
+What happens: the skill reads `.gtm/active-run`, queries Conductor, and translates the workflow state into plain English ("we're 40% through, ~12 min in, the panel is debating positioning; want to see the ICP draft now?").
+
+### 5. Force a specific persona voice on assets
+
+> When you get to the asset voice pick, use Draper — the emotional-truth one. I want headlines, not bullet lists.
+
+What happens: at the voice gate, the skill commits to Draper for `artifact_generation`. Outbound sequences, ad copy, and landing copy all carry his signature moves (the reframe, lead with feeling, no proof points above story).
+
+### 6. Pause a long-running run
+
+> Pause the run. I'll come back to it tomorrow.
+
+What happens: `conductor workflow pause <id>`. Resume with "resume the gtm run" any time.
+
+### 7. Iterate on positioning without re-running everything
+
+> The positioning we just landed is good but I want to test a category-creation play instead. Can we re-run positioning with that frame?
+
+What happens: the skill terminates the current run, kicks off a new one with `positioning_hypothesis` carrying the category-creation framing, and tells you when the new positioning is ready for review.
+
+### 8. Get just the deliverables, no debate
+
+> Give me messaging house + landing copy + 3 ad copy variants for **<product description>**, voice: Dunford. Skip the long synthesis loops.
+
+What happens: Mode C intake with `max_synthesis_iterations: 1`, deliverables narrowed to the 3 requested. Run completes in ~10-15 min instead of 30-60.
 
 ---
 
