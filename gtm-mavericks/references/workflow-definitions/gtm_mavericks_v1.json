@@ -1,6 +1,6 @@
 {
   "name": "gtm_mavericks_v1",
-  "version": 1,
+  "version": 2,
   "description": "GTM Mavericks v24: all three modes wired (reposition/new_product/campaign) via discovery_normalize INLINE passthrough. Preserves v23 features: webSearch deep research, Socratic probe, iteration-aware synthesis prompts, named-input salvage, executive summary LLM, 3-tier PDF (Exec Summary / Part 1 Deliverables / Part 2 Appendix).",
   "ownerEmail": "viren@orkes.io",
   "schemaVersion": 2,
@@ -33,7 +33,13 @@
         "mode": "${workflow.input.mode}",
         "deliverables": "${workflow.input.deliverables}",
         "evaluatorType": "graaljs",
-        "expression": "function e() { return { ok: true, normalized_mode: $.mode, deliverables_count: ($.deliverables||[]).length }; } e();"
+        "expression": "function e() {\n  // Accept either flat (product_name, product_description) or nested (product.{name,description})\n  var product = $.product || {};\n  if (!product.name && $.product_name) product.name = $.product_name;\n  if (!product.description && $.product_description) product.description = $.product_description;\n  if (!product.url && $.product_url) product.url = $.product_url;\n\n  if (!product.name || (typeof product.name === 'string' && product.name.length < 1)) {\n    throw new Error('missing_product_name: workflow input must have product.name or product_name. The skill must collect this before launch.');\n  }\n  if (!product.description || (typeof product.description === 'string' && product.description.length < 20)) {\n    throw new Error('missing_product_description: workflow input must have product.description (or product_description) with at least 20 characters. The skill must collect this before launch \u2014 and re-launch after fixing.');\n  }\n\n  // Default model selection if caller didn't specify\n  var llm_provider = $.llm_provider || 'anthropic';\n  var llm_model = $.llm_model || 'claude-sonnet-4-6';\n\n  return {\n    ok: true,\n    normalized_mode: $.mode,\n    deliverables_count: ($.deliverables || []).length,\n    product: product,\n    llm_provider: llm_provider,\n    llm_model: llm_model\n  };\n}\ne();",
+        "product": "${workflow.input.product}",
+        "product_name": "${workflow.input.product_name}",
+        "product_description": "${workflow.input.product_description}",
+        "product_url": "${workflow.input.product_url}",
+        "llm_provider": "${workflow.input.llm_provider}",
+        "llm_model": "${workflow.input.llm_model}"
       }
     },
     {
@@ -119,8 +125,8 @@
             "taskReferenceName": "icp_draper",
             "type": "LLM_CHAT_COMPLETE",
             "inputParameters": {
-              "llmProvider": "anthropic",
-              "model": "claude-sonnet-4-5",
+              "llmProvider": "${workflow.input.llm_provider}",
+              "model": "${workflow.input.llm_model}",
               "maxTokens": 6000,
               "messages": [
                 {
@@ -141,8 +147,8 @@
             "taskReferenceName": "icp_jobs",
             "type": "LLM_CHAT_COMPLETE",
             "inputParameters": {
-              "llmProvider": "anthropic",
-              "model": "claude-sonnet-4-5",
+              "llmProvider": "${workflow.input.llm_provider}",
+              "model": "${workflow.input.llm_model}",
               "maxTokens": 6000,
               "messages": [
                 {
@@ -163,8 +169,8 @@
             "taskReferenceName": "icp_ogilvy",
             "type": "LLM_CHAT_COMPLETE",
             "inputParameters": {
-              "llmProvider": "anthropic",
-              "model": "claude-sonnet-4-5",
+              "llmProvider": "${workflow.input.llm_provider}",
+              "model": "${workflow.input.llm_model}",
               "maxTokens": 6000,
               "messages": [
                 {
@@ -185,8 +191,8 @@
             "taskReferenceName": "icp_clow",
             "type": "LLM_CHAT_COMPLETE",
             "inputParameters": {
-              "llmProvider": "anthropic",
-              "model": "claude-sonnet-4-5",
+              "llmProvider": "${workflow.input.llm_provider}",
+              "model": "${workflow.input.llm_model}",
               "maxTokens": 6000,
               "messages": [
                 {
@@ -207,8 +213,8 @@
             "taskReferenceName": "icp_halbert",
             "type": "LLM_CHAT_COMPLETE",
             "inputParameters": {
-              "llmProvider": "anthropic",
-              "model": "claude-sonnet-4-5",
+              "llmProvider": "${workflow.input.llm_provider}",
+              "model": "${workflow.input.llm_model}",
               "maxTokens": 6000,
               "messages": [
                 {
@@ -229,8 +235,8 @@
             "taskReferenceName": "icp_dunford",
             "type": "LLM_CHAT_COMPLETE",
             "inputParameters": {
-              "llmProvider": "anthropic",
-              "model": "claude-sonnet-4-5",
+              "llmProvider": "${workflow.input.llm_provider}",
+              "model": "${workflow.input.llm_model}",
               "maxTokens": 6000,
               "messages": [
                 {
@@ -276,8 +282,8 @@
           "taskReferenceName": "icp_synthesis_loop_draft",
           "type": "LLM_CHAT_COMPLETE",
           "inputParameters": {
-            "llmProvider": "anthropic",
-            "model": "claude-sonnet-4-5",
+            "llmProvider": "${workflow.input.llm_provider}",
+            "model": "${workflow.input.llm_model}",
             "maxTokens": 10000,
             "messages": [
               {
@@ -297,8 +303,8 @@
           "taskReferenceName": "icp_synthesis_loop_probe",
           "type": "LLM_CHAT_COMPLETE",
           "inputParameters": {
-            "llmProvider": "anthropic",
-            "model": "claude-sonnet-4-5",
+            "llmProvider": "${workflow.input.llm_provider}",
+            "model": "${workflow.input.llm_model}",
             "maxTokens": 3000,
             "messages": [
               {
@@ -362,8 +368,8 @@
             "taskReferenceName": "pos_draper",
             "type": "LLM_CHAT_COMPLETE",
             "inputParameters": {
-              "llmProvider": "anthropic",
-              "model": "claude-sonnet-4-5",
+              "llmProvider": "${workflow.input.llm_provider}",
+              "model": "${workflow.input.llm_model}",
               "maxTokens": 6000,
               "messages": [
                 {
@@ -384,8 +390,8 @@
             "taskReferenceName": "pos_jobs",
             "type": "LLM_CHAT_COMPLETE",
             "inputParameters": {
-              "llmProvider": "anthropic",
-              "model": "claude-sonnet-4-5",
+              "llmProvider": "${workflow.input.llm_provider}",
+              "model": "${workflow.input.llm_model}",
               "maxTokens": 6000,
               "messages": [
                 {
@@ -406,8 +412,8 @@
             "taskReferenceName": "pos_ogilvy",
             "type": "LLM_CHAT_COMPLETE",
             "inputParameters": {
-              "llmProvider": "anthropic",
-              "model": "claude-sonnet-4-5",
+              "llmProvider": "${workflow.input.llm_provider}",
+              "model": "${workflow.input.llm_model}",
               "maxTokens": 6000,
               "messages": [
                 {
@@ -428,8 +434,8 @@
             "taskReferenceName": "pos_clow",
             "type": "LLM_CHAT_COMPLETE",
             "inputParameters": {
-              "llmProvider": "anthropic",
-              "model": "claude-sonnet-4-5",
+              "llmProvider": "${workflow.input.llm_provider}",
+              "model": "${workflow.input.llm_model}",
               "maxTokens": 6000,
               "messages": [
                 {
@@ -450,8 +456,8 @@
             "taskReferenceName": "pos_halbert",
             "type": "LLM_CHAT_COMPLETE",
             "inputParameters": {
-              "llmProvider": "anthropic",
-              "model": "claude-sonnet-4-5",
+              "llmProvider": "${workflow.input.llm_provider}",
+              "model": "${workflow.input.llm_model}",
               "maxTokens": 6000,
               "messages": [
                 {
@@ -472,8 +478,8 @@
             "taskReferenceName": "pos_dunford",
             "type": "LLM_CHAT_COMPLETE",
             "inputParameters": {
-              "llmProvider": "anthropic",
-              "model": "claude-sonnet-4-5",
+              "llmProvider": "${workflow.input.llm_provider}",
+              "model": "${workflow.input.llm_model}",
               "maxTokens": 6000,
               "messages": [
                 {
@@ -519,8 +525,8 @@
           "taskReferenceName": "positioning_synthesis_loop_draft",
           "type": "LLM_CHAT_COMPLETE",
           "inputParameters": {
-            "llmProvider": "anthropic",
-            "model": "claude-sonnet-4-5",
+            "llmProvider": "${workflow.input.llm_provider}",
+            "model": "${workflow.input.llm_model}",
             "maxTokens": 10000,
             "messages": [
               {
@@ -540,8 +546,8 @@
           "taskReferenceName": "positioning_synthesis_loop_probe",
           "type": "LLM_CHAT_COMPLETE",
           "inputParameters": {
-            "llmProvider": "anthropic",
-            "model": "claude-sonnet-4-5",
+            "llmProvider": "${workflow.input.llm_provider}",
+            "model": "${workflow.input.llm_model}",
             "maxTokens": 3000,
             "messages": [
               {
@@ -610,8 +616,8 @@
           "taskReferenceName": "messaging_house_loop_draft",
           "type": "LLM_CHAT_COMPLETE",
           "inputParameters": {
-            "llmProvider": "anthropic",
-            "model": "claude-sonnet-4-5",
+            "llmProvider": "${workflow.input.llm_provider}",
+            "model": "${workflow.input.llm_model}",
             "maxTokens": 8000,
             "messages": [
               {
@@ -631,8 +637,8 @@
           "taskReferenceName": "messaging_house_loop_probe",
           "type": "LLM_CHAT_COMPLETE",
           "inputParameters": {
-            "llmProvider": "anthropic",
-            "model": "claude-sonnet-4-5",
+            "llmProvider": "${workflow.input.llm_provider}",
+            "model": "${workflow.input.llm_model}",
             "maxTokens": 3000,
             "messages": [
               {
@@ -701,8 +707,8 @@
                   "taskReferenceName": "asset_sales_playbook_dunford",
                   "type": "LLM_CHAT_COMPLETE",
                   "inputParameters": {
-                    "llmProvider": "anthropic",
-                    "model": "claude-sonnet-4-5",
+                    "llmProvider": "${workflow.input.llm_provider}",
+                    "model": "${workflow.input.llm_model}",
                     "maxTokens": 10000,
                     "messages": [
                       {
@@ -723,8 +729,8 @@
                   "taskReferenceName": "asset_sales_playbook_halbert",
                   "type": "LLM_CHAT_COMPLETE",
                   "inputParameters": {
-                    "llmProvider": "anthropic",
-                    "model": "claude-sonnet-4-5",
+                    "llmProvider": "${workflow.input.llm_provider}",
+                    "model": "${workflow.input.llm_model}",
                     "maxTokens": 10000,
                     "messages": [
                       {
@@ -745,8 +751,8 @@
                   "taskReferenceName": "asset_sales_playbook_ogilvy",
                   "type": "LLM_CHAT_COMPLETE",
                   "inputParameters": {
-                    "llmProvider": "anthropic",
-                    "model": "claude-sonnet-4-5",
+                    "llmProvider": "${workflow.input.llm_provider}",
+                    "model": "${workflow.input.llm_model}",
                     "maxTokens": 10000,
                     "messages": [
                       {
@@ -778,8 +784,8 @@
             "taskReferenceName": "asset_sales_playbook_judge",
             "type": "LLM_CHAT_COMPLETE",
             "inputParameters": {
-              "llmProvider": "anthropic",
-              "model": "claude-sonnet-4-5",
+              "llmProvider": "${workflow.input.llm_provider}",
+              "model": "${workflow.input.llm_model}",
               "maxTokens": 16000,
               "messages": [
                 {
@@ -806,8 +812,8 @@
                   "taskReferenceName": "asset_landing_copy_dunford",
                   "type": "LLM_CHAT_COMPLETE",
                   "inputParameters": {
-                    "llmProvider": "anthropic",
-                    "model": "claude-sonnet-4-5",
+                    "llmProvider": "${workflow.input.llm_provider}",
+                    "model": "${workflow.input.llm_model}",
                     "maxTokens": 10000,
                     "messages": [
                       {
@@ -828,8 +834,8 @@
                   "taskReferenceName": "asset_landing_copy_halbert",
                   "type": "LLM_CHAT_COMPLETE",
                   "inputParameters": {
-                    "llmProvider": "anthropic",
-                    "model": "claude-sonnet-4-5",
+                    "llmProvider": "${workflow.input.llm_provider}",
+                    "model": "${workflow.input.llm_model}",
                     "maxTokens": 10000,
                     "messages": [
                       {
@@ -850,8 +856,8 @@
                   "taskReferenceName": "asset_landing_copy_ogilvy",
                   "type": "LLM_CHAT_COMPLETE",
                   "inputParameters": {
-                    "llmProvider": "anthropic",
-                    "model": "claude-sonnet-4-5",
+                    "llmProvider": "${workflow.input.llm_provider}",
+                    "model": "${workflow.input.llm_model}",
                     "maxTokens": 10000,
                     "messages": [
                       {
@@ -883,8 +889,8 @@
             "taskReferenceName": "asset_landing_copy_judge",
             "type": "LLM_CHAT_COMPLETE",
             "inputParameters": {
-              "llmProvider": "anthropic",
-              "model": "claude-sonnet-4-5",
+              "llmProvider": "${workflow.input.llm_provider}",
+              "model": "${workflow.input.llm_model}",
               "maxTokens": 16000,
               "messages": [
                 {
@@ -911,8 +917,8 @@
                   "taskReferenceName": "asset_ad_copy_dunford",
                   "type": "LLM_CHAT_COMPLETE",
                   "inputParameters": {
-                    "llmProvider": "anthropic",
-                    "model": "claude-sonnet-4-5",
+                    "llmProvider": "${workflow.input.llm_provider}",
+                    "model": "${workflow.input.llm_model}",
                     "maxTokens": 10000,
                     "messages": [
                       {
@@ -933,8 +939,8 @@
                   "taskReferenceName": "asset_ad_copy_halbert",
                   "type": "LLM_CHAT_COMPLETE",
                   "inputParameters": {
-                    "llmProvider": "anthropic",
-                    "model": "claude-sonnet-4-5",
+                    "llmProvider": "${workflow.input.llm_provider}",
+                    "model": "${workflow.input.llm_model}",
                     "maxTokens": 10000,
                     "messages": [
                       {
@@ -955,8 +961,8 @@
                   "taskReferenceName": "asset_ad_copy_ogilvy",
                   "type": "LLM_CHAT_COMPLETE",
                   "inputParameters": {
-                    "llmProvider": "anthropic",
-                    "model": "claude-sonnet-4-5",
+                    "llmProvider": "${workflow.input.llm_provider}",
+                    "model": "${workflow.input.llm_model}",
                     "maxTokens": 10000,
                     "messages": [
                       {
@@ -988,8 +994,8 @@
             "taskReferenceName": "asset_ad_copy_judge",
             "type": "LLM_CHAT_COMPLETE",
             "inputParameters": {
-              "llmProvider": "anthropic",
-              "model": "claude-sonnet-4-5",
+              "llmProvider": "${workflow.input.llm_provider}",
+              "model": "${workflow.input.llm_model}",
               "maxTokens": 16000,
               "messages": [
                 {
@@ -1016,8 +1022,8 @@
                   "taskReferenceName": "asset_outbound_sequences_dunford",
                   "type": "LLM_CHAT_COMPLETE",
                   "inputParameters": {
-                    "llmProvider": "anthropic",
-                    "model": "claude-sonnet-4-5",
+                    "llmProvider": "${workflow.input.llm_provider}",
+                    "model": "${workflow.input.llm_model}",
                     "maxTokens": 10000,
                     "messages": [
                       {
@@ -1038,8 +1044,8 @@
                   "taskReferenceName": "asset_outbound_sequences_halbert",
                   "type": "LLM_CHAT_COMPLETE",
                   "inputParameters": {
-                    "llmProvider": "anthropic",
-                    "model": "claude-sonnet-4-5",
+                    "llmProvider": "${workflow.input.llm_provider}",
+                    "model": "${workflow.input.llm_model}",
                     "maxTokens": 10000,
                     "messages": [
                       {
@@ -1060,8 +1066,8 @@
                   "taskReferenceName": "asset_outbound_sequences_ogilvy",
                   "type": "LLM_CHAT_COMPLETE",
                   "inputParameters": {
-                    "llmProvider": "anthropic",
-                    "model": "claude-sonnet-4-5",
+                    "llmProvider": "${workflow.input.llm_provider}",
+                    "model": "${workflow.input.llm_model}",
                     "maxTokens": 10000,
                     "messages": [
                       {
@@ -1093,8 +1099,8 @@
             "taskReferenceName": "asset_outbound_sequences_judge",
             "type": "LLM_CHAT_COMPLETE",
             "inputParameters": {
-              "llmProvider": "anthropic",
-              "model": "claude-sonnet-4-5",
+              "llmProvider": "${workflow.input.llm_provider}",
+              "model": "${workflow.input.llm_model}",
               "maxTokens": 16000,
               "messages": [
                 {
@@ -1143,8 +1149,8 @@
       "taskReferenceName": "executive_summary",
       "type": "LLM_CHAT_COMPLETE",
       "inputParameters": {
-        "llmProvider": "anthropic",
-        "model": "claude-sonnet-4-5",
+        "llmProvider": "${workflow.input.llm_provider}",
+        "model": "${workflow.input.llm_model}",
         "maxTokens": 8000,
         "messages": [
           {

@@ -105,17 +105,25 @@ The skill recognizes both slash commands and natural-language phrasing.
 When the user starts a run, walk through this sequence one question at a time:
 
 1. **What are we doing?** Offer A/B/C: launching new / repositioning / campaign. Map to `mode`: `new_product` / `reposition` / `campaign`. All three modes are fully wired.
-2. **What's the product?** Free-text description. Summarize back in one sentence and confirm.
+2. **What's the product?** Collect two things:
+   - **Product name** (short — e.g., "Sugar Water", "FlightCalm")
+   - **Product description** — at least 1–2 sentences with a concrete claim. Don't accept one-word answers or "an AI app." If the user is vague, ask one follow-up: "What does the product actually do? Who would use it? What's the unfair angle?" Build the intake's `product` object as `{ name, description }` (nested — never flat `product_name` / `product_description`; the workflow normalizes both shapes but the canonical form is nested).
+   - **Validation before launch:** `product.description` must be ≥20 characters. If it isn't, refuse to launch and ask the user to elaborate. This prevents the workflow's most common failure mode: synthesis tasks hallucinating a product from missing context (the personas will reason about "founders who don't know their ICP" instead of the actual product, and you'll get a coherent-looking strategy for the wrong product).
 3. **Who's the buyer, if you know?** Optional ICP hypothesis. If unknown, say so — ICP discovery becomes a primary objective.
 4. **Got any materials I should read?** Accept a folder path AND URLs pasted into chat. The discovery sub-workflow will fetch the URLs and feed real content into the audit prompts. Without URLs/files, ground truth drops significantly.
 5. **What deliverables do you want?** Show the checklist with smart defaults per mode:
    - Mode A (new product): ICP, positioning, messaging house, sales playbook, outbound sequences, landing copy
    - Mode B (reposition): ICP, positioning, messaging house, landing copy, ad copy
    - Mode C (campaign): messaging house, landing copy, ad copy, outbound sequences
-6. **How many refinement passes?** Map to `max_synthesis_iterations` (default 3; 4–5 for higher rigor). Each iteration runs draft → Socratic probe → revised draft. The loop self-terminates early when the probe returns `verdict: shippable`; otherwise it stops at the cap with documented_gaps for unresolved probes.
-7. **Output formats?** Markdown / PDF / Slides — default all three.
-8. **Heads-up at checkpoints?** Optional email/Slack. Default: no (conversational resume only).
-9. **Confirm and launch.** Show a one-paragraph plan summary, then start.
+6. **Which model?** Offer three tiers; default is **balanced**:
+   - **Fast** — `claude-haiku-4-5-20251001`. Cheapest, fastest. Good for Mode C campaign runs or when iterating on prompts. Voice tends to be more workmanlike.
+   - **Balanced** (default) — `claude-sonnet-4-6`. The model the workflow was tuned against. Best price/quality tradeoff for full GTM strategy work.
+   - **Most capable** — `claude-opus-4-7`. Slowest and most expensive. Use for high-stakes runs (board-deck-level positioning, $50M+ launches). The persona debates are sharper; the strategic forks tend to be more nuanced.
+   Map the user's choice to the intake payload's `llm_model` field; always set `llm_provider: "anthropic"`. Power users can pass a specific model ID — accept any string and let the workflow surface the error if the provider rejects it.
+7. **How many refinement passes?** Map to `max_synthesis_iterations` (default 3; 4–5 for higher rigor). Each iteration runs draft → Socratic probe → revised draft. The loop self-terminates early when the probe returns `verdict: shippable`; otherwise it stops at the cap with documented_gaps for unresolved probes.
+8. **Output formats?** Markdown / PDF / Slides — default all three.
+9. **Heads-up at checkpoints?** Optional email/Slack. Default: no (conversational resume only).
+10. **Confirm and launch.** Show a one-paragraph plan summary (including model name and product description so the user can correct), then start.
 
 ## Starting a run
 
@@ -124,16 +132,42 @@ After intake:
 1. Generate a run ID (`gtm-YYYYMMDD-HHMMSS-<3char>`).
 2. Create `.gtm/runs/<run-id>/{inputs,outputs}/` in the user's CWD.
 3. Copy any user-supplied corpus files into `.gtm/runs/<run-id>/inputs/`.
-4. Build the intake payload (see `references/artifact-schemas/intake-payload.schema.json`). **Include `run_id` in the payload** — bundle_artifacts needs it.
-5. Write the intake payload to `.gtm/runs/<run-id>/intake.json`.
-6. Start the workflow at the LATEST registered version using the conductor CLI:
-   ```bash
-   conductor workflow start -w gtm_mavericks_v1 --version 1 -f .gtm/runs/<run-id>/intake.json
+4. Build the intake payload. The canonical shape:
+   ```json
+   {
+     "run_id": "gtm-...",
+     "mode": "new_product | reposition | campaign",
+     "product": { "name": "...", "description": "at least 20 chars" },
+     "icp_hypothesis": "... or 'Unknown'",
+     "deliverables": [...],
+     "output_formats": [...],
+     "llm_provider": "anthropic",
+     "llm_model": "claude-sonnet-4-6",
+     "max_synthesis_iterations": 3,
+     "persona_library_version": "v1"
+   }
    ```
-   Always pass `--version 1` explicitly. Conductor's metadata cache can return older versions to new workflows otherwise. **Do not** start workflows via curl — see the non-negotiable rules at the top of this file.
+   **`product.description` is required and must be ≥20 characters.** The workflow's `normalize_intake` task validates this and will terminally fail the run if missing — see the error-recovery section below. Validate before launch in the skill to save the user a round-trip.
+5. Write the intake payload to `.gtm/runs/<run-id>/intake.json`.
+6. Start the workflow at v2 using the conductor CLI:
+   ```bash
+   conductor workflow start -w gtm_mavericks_v1 --version 2 -f .gtm/runs/<run-id>/intake.json
+   ```
+   Always pass `--version 2` explicitly. Conductor's metadata cache can return older versions to new workflows otherwise. **Do not** start workflows via curl — see the non-negotiable rules at the top of this file.
 7. Write `.gtm/runs/<run-id>/state.json` with workflowId, runId, mode, conductorProfile, llmProvider, llmModel, startedAt, lastSeenStatus.
 8. Write `.gtm/active-run` containing the run ID.
 9. Tell the user: "Started! The panel is doing discovery now — should be ~5 minutes before the first gate. You can walk away; ask me 'where are we' whenever."
+
+## Error recovery — `missing_product_*` after launch
+
+If a workflow run ends with status `FAILED` and the `reasonForIncompletion` contains `missing_product_name` or `missing_product_description`, that means `normalize_intake` terminally failed because the intake didn't contain a real product. The recovery path:
+
+1. Don't surface the JS error or task ID to the user. Translate it into plain English: *"I didn't have enough detail about the product to run a real strategy — the panel would just guess. Let's fix that and re-launch."*
+2. Re-ask the product-description question (intake step 2). Push for at least 1–2 substantive sentences. Read the description back to the user and confirm before re-launching.
+3. Write a NEW intake JSON with the fixed `product.description`, generate a new `run_id`, and launch a fresh workflow run with `--version 2`. Don't try to resume the failed run — `normalize_intake` is the first real task; nothing useful happened.
+4. Mark the old run as superseded in `.gtm/runs/<old-id>/state.json` so it doesn't show up as the active run anymore.
+
+Other `normalize_intake` failure modes are bugs — surface them with a "this didn't work, here's the workflow ID for debugging" message and stop.
 
 ## Architecture — what each phase does
 
