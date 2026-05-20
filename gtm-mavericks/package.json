@@ -13,14 +13,14 @@
     "orkes",
     "agentic-workflow"
   ],
-  "homepage": "https://github.com/conductoross/awesome-skills/tree/main/gtm-mavericks",
+  "homepage": "https://github.com/conductor-oss/awesome-skills/tree/main/gtm-mavericks",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/conductoross/awesome-skills.git",
+    "url": "git+https://github.com/conductor-oss/awesome-skills.git",
     "directory": "gtm-mavericks"
   },
   "bugs": {
-    "url": "https://github.com/conductoross/awesome-skills/issues"
+    "url": "https://github.com/conductor-oss/awesome-skills/issues"
   },
   "license": "Apache-2.0",
   "author": "Orkes (https://orkes.io)",

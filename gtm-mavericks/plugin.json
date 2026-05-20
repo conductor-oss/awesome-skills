@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "description": "GTM Mavericks — run deep go-to-market strategy through a Conductor workflow with a 6-persona panel of marketing mavericks (Draper, Jobs, Ogilvy, Clow, Halbert, Dunford).",
   "author": "Orkes",
-  "homepage": "https://github.com/conductoross/awesome-skills/tree/main/gtm-mavericks",
-  "repository": "https://github.com/conductoross/awesome-skills",
+  "homepage": "https://github.com/conductor-oss/awesome-skills/tree/main/gtm-mavericks",
+  "repository": "https://github.com/conductor-oss/awesome-skills",
   "license": "Apache-2.0",
   "keywords": ["gtm", "marketing", "positioning", "conductor", "agentic-workflow"],
   "skills": [
