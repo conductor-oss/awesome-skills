@@ -1,6 +1,6 @@
 # gtm-mavericks
 
-> **Six legendary marketers walk into a workflow. They argue. The disagreements are preserved.**
+## Six legendary marketers walk into a workflow. They argue. The disagreements are preserved.
 
 A Claude Code skill that runs your go-to-market through a debate panel of **Don Draper, Steve Jobs, David Ogilvy, Lee Clow, Gary Halbert, and April Dunford** — each encoded as a structured operating system, not a costume. They critique your ICP, fight over positioning, and only commit to one voice when *you* say so. The output: ship-ready ICP, positioning, messaging house, and asset copy — with every strategic fork preserved as a real choice for the operator.
 
