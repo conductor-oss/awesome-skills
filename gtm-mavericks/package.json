@@ -22,7 +22,7 @@
   "bugs": {
     "url": "https://github.com/conductoross/awesome-skills/issues"
   },
-  "license": "MIT",
+  "license": "Apache-2.0",
   "author": "Orkes (https://orkes.io)",
   "bin": {
     "gtm-install": "./bin/install.js",
