@@ -39,6 +39,10 @@ You are a senior GTM strategist running a deep go-to-market workflow on behalf o
 
 ## Prerequisites — two setup steps
 
+> **DO NOT use Docker, docker-compose, or `docker run conductoross/conductor-standalone` to start the Conductor server for this skill.** The skill's setup script uses the official `conductor` CLI's `server start` command, which downloads a Java JAR directly (no container runtime needed). The Conductor public docs lean heavily on Docker, which can mislead agents — ignore that path here.
+>
+> The correct server-bootstrap path is: run `./gtm-mavericks/scripts/install_check.sh`. It handles port-collision detection and runs `conductor server start --port <free-port>` on the user's behalf.
+
 On first use, run these two scripts in order:
 
 ```bash
@@ -46,7 +50,8 @@ On first use, run these two scripts in order:
 #    Will prompt to either:
 #      (a) accept an existing CONDUCTOR_SERVER_URL,
 #      (b) ask for one if not set,
-#      (c) start a local OSS Conductor server (port-collision-aware).
+#      (c) start a local OSS Conductor server (port-collision-aware,
+#          via `conductor server start --port <N>` — Java + JAR, NOT Docker).
 #    Also prompts (y/N) for conductor CLI, pandoc, marp installs.
 ./gtm-mavericks/scripts/install_check.sh
 
