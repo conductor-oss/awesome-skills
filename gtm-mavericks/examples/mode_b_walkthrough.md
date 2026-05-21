@@ -12,7 +12,7 @@ User has: 8 lost-deal call transcripts, current website copy, last quarter's sal
 2. *Product?* → "Hublink — async-first team workspace. Currently positioned as 'team collaboration software.'"
 3. *Buyer?* → "VPs of Engineering at 50–500 person tech companies"
 4. *Materials?* → `./inputs/lost-deals/`, `./inputs/website-copy.md`, `./inputs/rep-survey.csv`
-5. *Model?* → Balanced (claude-sonnet-4-6); consider Most Capable (claude-opus-4-7) for an $8M ARR Series B repositioning bet.
+5. *Model?* → Balanced (claude-sonnet-4-6). Opus 4.7 would be the natural pick for an $8M ARR Series B repositioning bet but is currently incompatible with the Conductor Anthropic adapter (see SKILL.md gotcha #12) — stick with Sonnet until that's patched.
 6. *Refinement passes?* → 4 (one extra over default — lost-deal patterns benefit from deeper Socratic probing).
 
 ## What "looks right"

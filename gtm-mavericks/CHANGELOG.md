@@ -2,6 +2,19 @@
 
 All notable changes to gtm-mavericks. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); this project uses semver while pre-1.0.
 
+## [0.2.2] — 2026-05-20
+
+Documents a real failure mode and removes a recommendation that doesn't currently work.
+
+### Changed
+- **SKILL.md intake wizard, step 5 (Which model?)** — dropped the "Most capable" Opus 4.7 tier and removed the `opus → claude-opus-4-7` shorthand normalization. Sonnet 4.6 is now the most capable model the workflow can run end-to-end.
+- **SKILL.md gotchas** — added #12: Opus 4.7 fails at the first LLM task with `"thinking.type.enabled" is not supported for this model`. Root cause is the Conductor Anthropic adapter, not the skill. Documented the literal error and the recovery (relaunch with `claude-sonnet-4-6`).
+- **`examples/mode_b_walkthrough.md`** — removed the Opus 4.7 recommendation for the $8M ARR Series B reposition example.
+- **`docs/design/architecture.md`** — updated the architecture diagram (model placeholder no longer includes `opus`) and added an explicit entry in §13.2 Limitations referencing gotcha #12.
+
+### Migration
+No code changes. If you have intake JSONs with `"llm_model": "claude-opus-4-7"`, change to `"claude-sonnet-4-6"` before the next run — Opus runs will fail at the first LLM task. When the Conductor Anthropic adapter is patched to use `thinking.type.adaptive`, this limitation can be removed and the Opus tier restored.
+
 ## [0.2.1] — 2026-05-20
 
 One-command install via npx, with per-agent targeting.

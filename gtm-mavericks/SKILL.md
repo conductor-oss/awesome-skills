@@ -111,12 +111,13 @@ When the user starts a run, walk through this sequence one question at a time:
    - This prevents the workflow's most common failure mode: synthesis tasks hallucinating a product from missing context (the personas reason about "founders who don't know their ICP" instead of the actual product, and you get a coherent-looking strategy for the wrong product).
 3. **Who's the buyer, if you know?** Optional ICP hypothesis. If unknown, say so — ICP discovery becomes a primary objective.
 4. **Got any materials I should read?** Accept a folder path AND URLs pasted into chat. The discovery sub-workflow will fetch the URLs (up to 10, 12KB cap each) and feed real content into the audit prompts. Without URLs/files, ground truth drops significantly.
-5. **Which model?** Offer three tiers; default is **balanced**:
+5. **Which model?** Offer two tiers; default is **balanced**:
    - **Fast** — `claude-haiku-4-5-20251001`. Cheapest, fastest. Good for Mode C campaign runs or when iterating on prompts. Voice tends to be more workmanlike.
    - **Balanced** (default) — `claude-sonnet-4-6`. The model the workflow was tuned against. Best price/quality tradeoff for full GTM strategy work.
-   - **Most capable** — `claude-opus-4-7`. Slowest and most expensive. Use for high-stakes runs (board-deck-level positioning, $50M+ launches). The persona debates are sharper; the strategic forks tend to be more nuanced.
 
-   Normalize shorthand before sending: "sonnet" / "sonnet 4.6" / "Sonnet" → `claude-sonnet-4-6`; "opus" / "opus 4.7" → `claude-opus-4-7`; "haiku" → `claude-haiku-4-5-20251001`. Map the user's choice to the intake payload's `llm_model` field; always set `llm_provider: "anthropic"`. Power users can pass a specific model ID — accept it verbatim if it looks canonical (starts with `claude-`); otherwise normalize.
+   **Known limitation — Opus 4.7 not currently usable.** Do not offer or recommend `claude-opus-4-7`. The Conductor Anthropic adapter sends `thinking.type.enabled`, which Opus 4.7 rejects (it requires `thinking.type.adaptive` + `output_config.effort`). The run will fail at the first LLM task. See gotcha #12. Until the Conductor adapter is patched, Sonnet 4.6 is the most capable model the workflow can run. If the user explicitly asks for Opus, warn them, confirm before launching, and tell them the failure mode.
+
+   Normalize shorthand before sending: "sonnet" / "sonnet 4.6" / "Sonnet" → `claude-sonnet-4-6`; "haiku" → `claude-haiku-4-5-20251001`. Map the user's choice to the intake payload's `llm_model` field; always set `llm_provider: "anthropic"`. Power users can pass a specific model ID — accept it verbatim if it looks canonical (starts with `claude-`); otherwise normalize. Do not auto-normalize "opus" / "opus 4.7" to `claude-opus-4-7` — surface the known-limitation warning instead.
 6. **How many refinement passes?** Map to `max_synthesis_iterations` (default 3; 4–5 for higher rigor). Each iteration runs draft → Socratic probe → revised draft. The loop self-terminates early when the probe returns `verdict: shippable`; otherwise it stops at the cap with documented_gaps for unresolved probes.
 7. **Confirm and launch.** Show a one-paragraph plan summary (including model name and product description so the user can correct), then start.
 
@@ -398,6 +399,20 @@ If you add new INLINE tasks: never iterate a Conductor-proxied input. Always acc
 ### 11. PUT-array is the only reliable upsert
 
 `POST /api/metadata/workflow` returns HTTP 500 "already exists" on re-registration, even with `?overwrite=true`, in our OSS Conductor build. The path that always upserts is `PUT /api/metadata/workflow` with a JSON array body containing one or more workflow defs. `register_workflows.sh` uses this pattern.
+
+### 12. Opus 4.7 fails on the current Conductor Anthropic adapter
+
+If a user runs with `llm_model: claude-opus-4-7`, the first LLM task fails with:
+
+```
+Anthropic Messages API failed with status 400: "thinking.type.enabled" is not
+supported for this model. Use "thinking.type.adaptive" and "output_config.effort"
+to control thinking behavior.
+```
+
+Root cause: the Conductor Anthropic provider translates the workflow's `thinkingTokenLimit` into a `thinking.type.enabled` request parameter. Claude Opus 4.7 dropped that shape and requires the newer `thinking.type.adaptive` + `output_config.effort` parameters. The fix is in the **Conductor server's Anthropic adapter**, not in this skill — the workflow JSONs only declare `thinkingTokenLimit`. Until the adapter is patched, recommend Sonnet 4.6 as the most capable available model.
+
+If a user insists on trying Opus 4.7 anyway: confirm, then let it run — the failure is fast (under a minute) and recoverable by relaunching with `llm_model: claude-sonnet-4-6`.
 
 ## File layout
 

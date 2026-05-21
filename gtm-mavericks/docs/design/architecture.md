@@ -61,8 +61,8 @@ The differentiator is the **panel of six marketing legends** — Don Draper, Ste
                      │ (model + web_search tool)
                      ▼
         ┌────────────────────────────────────┐
-        │  Anthropic (claude-{haiku|sonnet|  │
-        │  opus}-N + web_search server tool) │
+        │  Anthropic (claude-{haiku|sonnet}-N │
+        │   + web_search server tool)        │
         └────────────────────────────────────┘
 ```
 
@@ -818,6 +818,7 @@ Explicit list of what the workflow **does not** do, by design or by current impl
 
 ### 13.2 By current implementation
 
+- **Opus 4.7 not currently usable.** `claude-opus-4-7` fails at the first LLM task with `invalid_request_error: "thinking.type.enabled" is not supported for this model`. Root cause: the Conductor Anthropic adapter sends `thinking.type.enabled` (derived from the workflow's `thinkingTokenLimit`), but Opus 4.7 dropped that shape and requires `thinking.type.adaptive` + `output_config.effort`. The fix lives in the Conductor server adapter, not in this skill — the workflow JSONs only declare `thinkingTokenLimit`. SKILL.md gotcha #12 documents the user-visible symptom; the intake wizard does not offer Opus until the adapter is patched.
 - **No mid-run revision channel.** Even if the operator pauses, modifies an artifact externally, and resumes, the workflow does not pick up the modification — it continues with whatever was in the upstream task's output.
 - **The 12KB-per-URL corpus cap** is a hard limit on user-supplied URL content. Long landing pages get truncated. Workaround: convert the long page to a markdown file in `inputs/` (file inputs aren't capped).
 - **The 10-URL corpus cap.** More than 10 URLs and the discovery sub-workflow ignores the overflow. Workaround: pre-curate to the 10 most-representative URLs.
