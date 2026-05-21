@@ -2,6 +2,31 @@
 
 All notable changes to gtm-mavericks. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); this project uses semver while pre-1.0.
 
+## [0.2.1] — 2026-05-20
+
+One-command install via npx, with per-agent targeting.
+
+### Added
+- **`bin/gtm.js`** — unified installer entry. Available as `npx @conductor-skills/gtm` (no global install needed). Flags:
+  - `--agent <id>` — install only into one agent (`claude-code`, `codex`, `gemini`, `opencode`, `claude-code-plugins`). Comma-separated for multiple. `all` installs everywhere.
+  - `--bootstrap` — additionally run `install_check.sh` (Conductor server setup) and `register_workflows.sh`.
+  - `--bootstrap-only` — skip symlinking; only bootstrap Conductor.
+  - `--uninstall` — remove every symlink.
+  - `--help`, `--quiet`.
+- New `bin.gtm` entry in `package.json` so `npx @conductor-skills/gtm` resolves to the unified installer.
+
+### Changed
+- `bin.gtm-install` and `bin.gtm-uninstall` now point at `bin/gtm.js` (basename detection sets the right flag). Behavior unchanged for users of the global `gtm-install` / `gtm-uninstall` commands.
+- `bin/postinstall.js` now delegates to `bin/gtm.js`. **Skips itself under `npx` (`npm_command === 'exec'`)** so flags like `--agent codex` aren't pre-empted by an unconditional auto-symlink during the `npx` fetch phase.
+- README installation section rewritten to lead with the one-command `npx` flow.
+
+### Removed
+- `bin/install.js` and `bin/uninstall.js` — folded into `bin/gtm.js`.
+
+### Migration
+
+No breaking changes for users. Existing `npm install -g @conductor-skills/gtm` continues to work and auto-symlinks. Existing `gtm-install` and `gtm-uninstall` commands continue to work.
+
 ## [0.2.0] — 2026-05-20
 
 Substantive cleanup pass: removed several intake fields the workflow silently ignored, fixed misleading docs, added a full engineering design doc.

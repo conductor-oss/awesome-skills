@@ -28,12 +28,24 @@ You can walk away at any point. Conductor holds the state. Come back hours or da
 
 ## Installation
 
+One command, no global install required:
+
 ```bash
-npm install -g @conductor-skills/gtm
-gtm-install
+# Install into every coding agent we detect (Claude Code, Codex, Gemini CLI, OpenCode)
+npx @conductor-skills/gtm
+
+# Or pick one
+npx @conductor-skills/gtm --agent codex
+
+# Add --bootstrap to also set up a local Conductor server and register workflows
+npx @conductor-skills/gtm --bootstrap
 ```
 
-That's it. The postinstall auto-detects which agents you have installed — Claude Code, Codex CLI, Gemini CLI, OpenCode — and symlinks the skill into each one's skills directory. `gtm-install` is interactive: for the Conductor server, it offers to start one locally for you (downloads the OSS jar once, finds an available port if 8080 is taken) or accepts a URL you provide. Re-runnable; safe to retry.
+That's it. The installer auto-detects which agents you have, symlinks the skill into each, and prints next steps. The `--bootstrap` flag is interactive — for the Conductor server, it offers to start one locally for you (downloads the OSS jar once, finds an available port if 8080 is taken) or accepts a URL you provide. Re-runnable; safe to retry.
+
+Want it globally on your PATH? `npm install -g @conductor-skills/gtm` still works and runs the same auto-detect. After that, `gtm`, `gtm-install` (= `--bootstrap`), and `gtm-uninstall` are available directly.
+
+To remove: `npx @conductor-skills/gtm --uninstall`.
 
 Start a new session in your agent and try:
 
