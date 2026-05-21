@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>awesome-skills — agent skills that don't end when your terminal does</title>
+  <meta name="description" content="A library of conversational skills, backed by durable Conductor workflows. Long-running, parallel, auditable agent work — installed into your coding agent in one command.">
+
+  <meta property="og:title" content="awesome-skills">
+  <meta property="og:description" content="Agent skills that don't end when your terminal does. Conversational skills backed by durable Conductor workflows.">
+  <meta property="og:type" content="website">
+
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..700,0..100;1,9..144,300..700,0..100&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+
+<!-- ---------- NAV ---------- -->
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="./">
+      <span class="mark" aria-hidden="true">
+        <svg viewBox="0 0 32 32"><g fill="none" stroke="#E8A33D" stroke-width="2.2" stroke-linecap="round"><path d="M6 9 L14 9 L18 16 L14 23 L6 23"/><path d="M11 16 L26 16"/><circle cx="26" cy="16" r="2.5" fill="#E8A33D"/></g></svg>
+      </span>
+      awesome-skills
+    </a>
+
+    <nav>
+      <ul>
+        <li><a href="#skills">Skills</a></li>
+        <li><a href="#install">Install</a></li>
+        <li><a href="#anatomy">Build</a></li>
+      </ul>
+    </nav>
+
+    <a class="ghbtn" href="https://github.com/conductor-oss/awesome-skills" target="_blank" rel="noopener">
+      <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      GitHub
+    </a>
+  </div>
+</header>
+
+<main>
+
+<!-- ---------- HERO ---------- -->
+<section class="hero">
+  <div class="wrap hero-grid">
+
+    <div>
+      <span class="eyebrow"><span class="num">01</span><span class="rule"></span>Open source · by Orkes</span>
+
+      <h1 class="reveal in">
+        Agent skills that <em>don't end</em> when your terminal does.
+      </h1>
+
+      <p class="lead">
+        A library of conversational skills, backed by durable Conductor workflows.
+        Long-running, parallel, auditable agent work — installed into your coding
+        agent in one command.
+      </p>
+
+      <div class="install-tile" data-copy="npx @conductor-skills/gtm">
+        <div>
+          <span class="prompt">$</span><code>npx @conductor-skills/gtm</code>
+        </div>
+        <button type="button" data-copy-btn aria-label="Copy install command">Copy</button>
+      </div>
+
+      <div class="hero-meta">
+        <span>Works in</span>
+        <span class="pill">Claude Code</span>
+        <span class="pill">Codex CLI</span>
+        <span class="pill">Gemini CLI</span>
+        <span class="pill">OpenCode</span>
+      </div>
+    </div>
+
+    <!-- live workflow panel -->
+    <aside class="panel" aria-label="Example workflow run">
+      <div class="panel-head">
+        <span class="run-id">RUN · gtm-mavericks</span>
+        <span class="live-dot">LIVE</span>
+      </div>
+
+      <div class="phase-line">
+        <span class="phase">phase · icp_panel</span>
+        <span class="elapsed">elapsed 04:38</span>
+      </div>
+
+      <ul class="lanes" aria-hidden="true">
+        <li class="lane"><span class="name">DRAPER</span>  <span class="track"><span class="fill"></span></span><span class="status">running</span></li>
+        <li class="lane"><span class="name">JOBS</span>    <span class="track"><span class="fill"></span></span><span class="status">running</span></li>
+        <li class="lane"><span class="name">OGILVY</span>  <span class="track"><span class="fill"></span></span><span class="status">running</span></li>
+        <li class="lane"><span class="name">CLOW</span>    <span class="track"><span class="fill"></span></span><span class="status">running</span></li>
+        <li class="lane"><span class="name">HALBERT</span> <span class="track"><span class="fill"></span></span><span class="status">running</span></li>
+        <li class="lane"><span class="name">DUNFORD</span> <span class="track"><span class="fill"></span></span><span class="status">running</span></li>
+      </ul>
+
+      <div class="fork">
+        <span class="fork-tag">STRATEGIC FORK</span>
+        <p class="fork-title">First Purchase Offer — Single Bar vs. Tasting Flight</p>
+        <ul class="fork-opts">
+          <li><span class="opt">A</span><span><b>$18 single bar</b> with full-refund guarantee. Slower acquisition, lower CAC payback.</span></li>
+          <li><span class="opt">B</span><span><b>$39 three-bar flight</b> with side-by-side tasting guide. Higher AOV, 3× guarantee exposure.</span></li>
+        </ul>
+        <div class="fork-rec">Recommendation · <b style="color:var(--paper)">Option A</b></div>
+      </div>
+    </aside>
+
+  </div>
+</section>
+
+<!-- ---------- THE TRADE ---------- -->
+<section id="shape">
+  <div class="wrap">
+    <header class="section-head reveal">
+      <span class="eyebrow"><span class="num">02</span><span class="rule"></span>The shape</span>
+      <h2>Skill on the front. <em>Workflow</em> underneath.</h2>
+      <p class="sub">
+        A skill alone is a prompt — it lives in your terminal until you close it.
+        Backed by a Conductor workflow, the same skill becomes something else
+        entirely: durable, parallel, and auditable.
+      </p>
+    </header>
+
+    <div class="trade-grid reveal-stagger">
+
+      <article class="trade-cell">
+        <span class="corner">A</span>
+        <span class="role">The skill</span>
+        <h3>Conversational layer</h3>
+        <p class="body">
+          Markdown plus YAML that your coding agent loads. Handles intake, status,
+          mid-run inspection. Stateless, portable across Claude Code, Codex CLI,
+          Gemini CLI, OpenCode.
+        </p>
+      </article>
+
+      <article class="trade-cell">
+        <span class="corner">B</span>
+        <span class="role">The workflow</span>
+        <h3>Durable engine</h3>
+        <p class="body">
+          A Conductor process running on a server. Parallel LLM tasks, retries,
+          persistent state, audit trail. Survives your laptop closing, the session
+          ending, you walking away for the weekend.
+        </p>
+      </article>
+
+      <article class="trade-cell">
+        <span class="corner">A+B</span>
+        <span class="role">The trade</span>
+        <h3>30–60&nbsp;min of <em>real</em> work</h3>
+        <p class="body">
+          Long-running agent runs you can review opportunistically, pause across
+          days, resume in any new session. Strategy, research, multi-step
+          orchestration — the kind of work no single prompt could finish.
+        </p>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ---------- FEATURED SKILL ---------- -->
+<section id="skills" class="featured">
+  <div class="wrap featured-grid">
+
+    <div>
+      <span class="eyebrow"><span class="num">03</span><span class="rule"></span>Featured · gtm-mavericks</span>
+
+      <h2>Six legendary marketers walk into a workflow. They <em>argue</em>. The disagreements are preserved.</h2>
+
+      <p class="body">
+        Runs your go-to-market through a debate panel of Draper, Jobs, Ogilvy,
+        Clow, Halbert, and Dunford — six personas, six parallel LLM tasks, six
+        opinionated lenses on your ICP and positioning. A synthesis loop probes
+        each draft adversarially. Disagreements that don't resolve become
+        strategic forks rather than getting smoothed into average.
+      </p>
+
+      <p class="body" style="margin-top: 16px;">
+        Output: ICP, positioning, messaging house, sales playbook, landing copy,
+        ad copy, outbound sequences — and a PDF that preserves every panel
+        disagreement as an appendix.
+      </p>
+
+      <div class="skill-meta" style="margin-top: 32px;">
+        <span class="ok">● Shipped</span>
+        <span>30–60 min runs</span>
+        <span>Apache 2.0</span>
+      </div>
+
+      <div class="ctas">
+        <a class="btn btn-primary" href="skills/gtm-mavericks.html">
+          Read the skill <span class="arrow">→</span>
+        </a>
+        <a class="btn btn-ghost" href="https://github.com/conductor-oss/awesome-skills/tree/main/gtm-mavericks" target="_blank" rel="noopener">
+          Source <span class="arrow">↗</span>
+        </a>
+      </div>
+    </div>
+
+    <aside class="excerpt reveal">
+      <span class="quotemark" aria-hidden="true">"</span>
+      <span class="label">From a real run · craft chocolate, Mode B reposition</span>
+      <h4>Strategic fork — First Purchase Offer</h4>
+
+      <div class="opts">
+        <div class="opt">
+          <span class="badge">A</span>
+          <div>
+            <div class="h">$18 single bar with full-refund guarantee.</div>
+            <div class="t">Slower subscriber acquisition. Most buyers need 2–3 purchases before subscribing, extending CAC payback from 1 month to 3–4. Guarantee claim rate is real risk at industry-typical 15–20%.</div>
+          </div>
+        </div>
+        <div class="opt">
+          <span class="badge">B</span>
+          <div>
+            <div class="h">$39 three-bar tasting flight with side-by-side guide.</div>
+            <div class="t">$39 feels steeper to ICPs who "don't want another $18 mistake" (now asking for a $39 mistake). Decision paralysis on origin selection. Guarantee exposure is 3×.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="rec">Recommendation · <b>Option A</b></div>
+    </aside>
+
+  </div>
+</section>
+
+<!-- ---------- CAPABILITIES ---------- -->
+<section>
+  <div class="wrap">
+    <header class="section-head reveal">
+      <span class="eyebrow"><span class="num">04</span><span class="rule"></span>What you get</span>
+      <h2>Things a single <em>prompt</em> can't do.</h2>
+    </header>
+
+    <div class="cap-grid reveal-stagger">
+
+      <article class="cap">
+        <span class="num">i</span>
+        <h3>Durable state</h3>
+        <p class="body">
+          Workflow state lives on the server. Close your laptop. Switch agents.
+          Restart your machine. Resume the next morning.
+        </p>
+      </article>
+
+      <article class="cap">
+        <span class="num">ii</span>
+        <h3>Real parallelism</h3>
+        <p class="body">
+          Six LLM tasks fork at once and a judge composes the winner. Not chained
+          prompts — actual parallel branches with structured outputs.
+        </p>
+      </article>
+
+      <article class="cap">
+        <span class="num">iii</span>
+        <h3>Refinement loops</h3>
+        <p class="body">
+          Draft → adversarial probe → revised draft, repeated until a quality
+          gate passes. Trivial in a workflow, hard in a single prompt.
+        </p>
+      </article>
+
+      <article class="cap">
+        <span class="num">iv</span>
+        <h3>Audit trail</h3>
+        <p class="body">
+          Every line of output traces back through the decisions log to a panel
+          critique or strategic fork. No "the model just said so."
+        </p>
+      </article>
+
+      <article class="cap">
+        <span class="num">v</span>
+        <h3>Mid-run inspection</h3>
+        <p class="body">
+          Ask "show me the ICP" while phase four is still running. The skill
+          surfaces whatever the synthesis loop has produced so far.
+        </p>
+      </article>
+
+      <article class="cap">
+        <span class="num">vi</span>
+        <h3>Concurrent runs</h3>
+        <p class="body">
+          Multiple workflows in flight at once. Disambiguate by product name.
+          The skill keeps them straight.
+        </p>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ---------- INSTALL ---------- -->
+<section id="install">
+  <div class="wrap">
+    <header class="section-head reveal">
+      <span class="eyebrow"><span class="num">05</span><span class="rule"></span>Start</span>
+      <h2>One command. <em>Every</em> agent on your machine.</h2>
+      <p class="sub">
+        The installer auto-detects which coding agents you have and symlinks the
+        skill into each. Re-runnable. Safe to retry. No global install required.
+      </p>
+    </header>
+
+    <div class="install-block">
+      <div class="install-cmds">
+
+        <div class="install-cmd" data-copy="npx @conductor-skills/gtm">
+          <div class="left">
+            <span class="prompt">$</span><code>npx @conductor-skills/gtm</code>
+            <span class="desc">— install into every agent we detect</span>
+          </div>
+          <button type="button" data-copy-btn aria-label="Copy">Copy</button>
+        </div>
+
+        <div class="install-cmd" data-copy="npx @conductor-skills/gtm --agent codex">
+          <div class="left">
+            <span class="prompt">$</span><code>npx @conductor-skills/gtm --agent codex</code>
+            <span class="desc">— or pick one</span>
+          </div>
+          <button type="button" data-copy-btn aria-label="Copy">Copy</button>
+        </div>
+
+        <div class="install-cmd" data-copy="npx @conductor-skills/gtm --bootstrap">
+          <div class="left">
+            <span class="prompt">$</span><code>npx @conductor-skills/gtm --bootstrap</code>
+            <span class="desc">— also set up Conductor + register workflows</span>
+          </div>
+          <button type="button" data-copy-btn aria-label="Copy">Copy</button>
+        </div>
+
+      </div>
+
+      <ul class="agents" aria-label="Agent install locations">
+        <li class="agent"><div class="nm">Claude Code</div><div class="pth">~/.claude/skills/&lt;skill&gt;/</div></li>
+        <li class="agent"><div class="nm">Codex CLI</div><div class="pth">~/.codex/skills/&lt;skill&gt;/</div></li>
+        <li class="agent"><div class="nm">Gemini CLI</div><div class="pth">~/.gemini/skills/&lt;skill&gt;/</div></li>
+        <li class="agent"><div class="nm">OpenCode</div><div class="pth">~/.config/opencode/skills/&lt;skill&gt;/</div></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ---------- ANATOMY ---------- -->
+<section id="anatomy">
+  <div class="wrap">
+    <header class="section-head reveal">
+      <span class="eyebrow"><span class="num">06</span><span class="rule"></span>For contributors</span>
+      <h2>The <em>shape</em> every skill in this repo follows.</h2>
+      <p class="sub">
+        The principle: the skill is conversational and stateless; the workflow is
+        durable and parallel. Anything that must survive a session belongs in the
+        workflow. Anything the user types belongs in the skill.
+      </p>
+    </header>
+
+    <div class="anatomy-grid">
+      <pre class="tree reveal"><span class="dir">&lt;skill-name&gt;/</span>
+├── SKILL.md                          <span class="com"># conversational orchestrator</span>
+├── bin/                              <span class="com"># npx installer</span>
+├── docs/design/architecture.md       <span class="com"># engineering reference</span>
+├── <span class="dir">references/</span>
+│   ├── workflow-definitions/         <span class="com"># Conductor workflows (JSON)</span>
+│   ├── personas/                     <span class="com"># persona contracts</span>
+│   ├── prompt-templates/             <span class="com"># per-phase prompts</span>
+│   ├── output-templates/             <span class="com"># Mustache markdown</span>
+│   └── platform-tools.md             <span class="com"># tool-name mapping</span>
+├── <span class="dir">scripts/</span>
+│   ├── install_check.sh              <span class="com"># interactive deps + server</span>
+│   ├── register_workflows.sh         <span class="com"># idempotent upsert</span>
+│   └── build_workflow.py             <span class="com"># canonical patcher</span>
+├── <span class="dir">evals/</span>                            <span class="com"># static + bundle + e2e</span>
+└── package.json                      <span class="com"># @conductor-skills/&lt;name&gt;</span></pre>
+
+      <div class="principles">
+        <div class="principle">
+          <h4>Conversational, not configurational.</h4>
+          <p>The skill talks. It asks for what it needs in plain English, one question at a time. No flags. No JSON. No workflow IDs.</p>
+        </div>
+        <div class="principle">
+          <h4>Durable state belongs in the workflow.</h4>
+          <p>If it has to survive a session, it lives in Conductor. The skill remembers nothing between turns; it queries state on demand and translates it back.</p>
+        </div>
+        <div class="principle">
+          <h4>Personas as operating systems.</h4>
+          <p>When a skill uses personas, they're structured field contracts — principles, evaluation questions, anti-patterns — applied mechanically by the workflow, not vibes.</p>
+        </div>
+        <div class="principle">
+          <h4>Forks beat consensus.</h4>
+          <p>When multiple model passes disagree on a high-stakes call, the skill preserves the fork with tradeoffs spelled out. The operator decides; the model never auto-resolves.</p>
+        </div>
+        <div class="principle">
+          <h4>Every artifact is auditable.</h4>
+          <p>Every line of final output traces back to a recorded critique, judge decision, or strategic fork. Strategy you can defend in a review.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ---------- CLOSING CTA ---------- -->
+<section>
+  <div class="wrap cta-wrap">
+    <h2 class="reveal">Build the next <em>skill</em>.</h2>
+    <div class="ctas">
+      <a class="btn btn-primary" href="https://github.com/conductor-oss/awesome-skills" target="_blank" rel="noopener">
+        Open on GitHub <span class="arrow">→</span>
+      </a>
+      <a class="btn btn-ghost" href="https://github.com/conductor-oss/conductor" target="_blank" rel="noopener">
+        About Conductor <span class="arrow">↗</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <div>© Orkes · Apache 2.0</div>
+    <ul>
+      <li><a href="https://github.com/conductor-oss/awesome-skills" target="_blank" rel="noopener">Repo</a></li>
+      <li><a href="https://github.com/conductor-oss/conductor" target="_blank" rel="noopener">Conductor</a></li>
+      <li><a href="https://orkes.io" target="_blank" rel="noopener">Orkes</a></li>
+    </ul>
+  </div>
+</footer>
+
+<script src="assets/app.js" defer></script>
+</body>
+</html>

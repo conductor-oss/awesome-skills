@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>gtm-mavericks — awesome-skills</title>
+  <meta name="description" content="Six legendary marketers walk into a workflow. They argue. The disagreements are preserved. A skill for your coding agent that runs your go-to-market through a panel of Draper, Jobs, Ogilvy, Clow, Halbert, and Dunford.">
+
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..700,0..100;1,9..144,300..700,0..100&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../assets/styles.css">
+
+  <style>
+    /* page-specific tweaks */
+    .skill-hero { padding-block: clamp(72px, 12vw, 140px); }
+    .skill-hero h1 {
+      font-family: var(--display);
+      font-size: clamp(2.5rem, 6.5vw, 5.5rem);
+      font-weight: 340;
+      line-height: 0.98;
+      letter-spacing: -0.02em;
+      font-variation-settings: "opsz" 144, "SOFT" 60;
+      max-width: 22ch;
+      margin-top: var(--s-5);
+    }
+    .skill-hero h1 em {
+      font-style: italic; color: var(--amber-3);
+      font-variation-settings: "opsz" 144, "SOFT" 100;
+    }
+    .breadcrumb {
+      font-family: var(--mono); font-size: var(--fs-mono);
+      text-transform: uppercase; letter-spacing: 0.14em;
+      color: var(--muted);
+      display: inline-flex; gap: var(--s-3); align-items: center;
+    }
+    .breadcrumb a { color: var(--paper-2); }
+    .breadcrumb a:hover { color: var(--amber); }
+    .breadcrumb .sep { color: var(--border-2); }
+
+    /* personas table */
+    .personas {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: var(--s-1);
+      background: var(--border);
+      border: 1px solid var(--border);
+    }
+    @media (max-width: 880px) { .personas { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 560px) { .personas { grid-template-columns: 1fr; } }
+    .persona {
+      background: var(--ink);
+      padding: var(--s-6);
+      display: flex; flex-direction: column;
+      gap: var(--s-3);
+      min-height: 220px;
+    }
+    .persona .nm {
+      font-family: var(--display);
+      font-size: 1.65rem;
+      font-weight: 400;
+      letter-spacing: -0.01em;
+      color: var(--paper);
+    }
+    .persona .role {
+      font-family: var(--mono); font-size: var(--fs-mono);
+      text-transform: uppercase; letter-spacing: 0.14em;
+      color: var(--amber);
+    }
+    .persona .move {
+      color: var(--paper-2);
+      font-size: 0.95rem;
+      line-height: 1.5;
+      font-style: italic;
+    }
+    .persona .strong {
+      margin-top: auto;
+      padding-top: var(--s-3);
+      border-top: 1px dashed var(--border);
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+    .persona .strong b { color: var(--paper); font-weight: 500; }
+
+    /* try-it grid */
+    .try {
+      display: grid; gap: var(--s-4);
+    }
+    .try .prompt-card {
+      padding: var(--s-6);
+      background: var(--ink-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      position: relative;
+    }
+    .try .prompt-card .label {
+      font-family: var(--mono); font-size: var(--fs-mono);
+      text-transform: uppercase; letter-spacing: 0.14em;
+      color: var(--amber);
+    }
+    .try .prompt-card .text {
+      margin-top: var(--s-3);
+      font-family: var(--display);
+      font-size: 1.2rem;
+      line-height: 1.4;
+      color: var(--paper);
+      font-style: italic;
+      font-weight: 400;
+    }
+
+    /* deliverables list */
+    .deliv { display: grid; gap: var(--s-2); max-width: 56rem; }
+    .deliv li {
+      display: grid; grid-template-columns: 180px 1fr;
+      gap: var(--s-5);
+      padding: var(--s-4) 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .deliv li:last-child { border-bottom: 0; }
+    .deliv .fname {
+      font-family: var(--mono); font-size: 0.88rem;
+      color: var(--amber); letter-spacing: -0.01em;
+    }
+    .deliv .desc { color: var(--paper-2); line-height: 1.55; }
+    @media (max-width: 640px) {
+      .deliv li { grid-template-columns: 1fr; gap: var(--s-2); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ---------- NAV ---------- -->
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="../">
+      <span class="mark" aria-hidden="true">
+        <svg viewBox="0 0 32 32"><g fill="none" stroke="#E8A33D" stroke-width="2.2" stroke-linecap="round"><path d="M6 9 L14 9 L18 16 L14 23 L6 23"/><path d="M11 16 L26 16"/><circle cx="26" cy="16" r="2.5" fill="#E8A33D"/></g></svg>
+      </span>
+      awesome-skills
+    </a>
+    <nav>
+      <ul>
+        <li><a href="../#skills">Skills</a></li>
+        <li><a href="../#install">Install</a></li>
+        <li><a href="../#anatomy">Build</a></li>
+      </ul>
+    </nav>
+    <a class="ghbtn" href="https://github.com/conductor-oss/awesome-skills" target="_blank" rel="noopener">
+      <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      GitHub
+    </a>
+  </div>
+</header>
+
+<main>
+
+<section class="skill-hero">
+  <div class="wrap">
+    <span class="breadcrumb">
+      <a href="../">awesome-skills</a> <span class="sep">/</span> <span>gtm-mavericks</span>
+    </span>
+
+    <h1>Six legendary marketers walk into a workflow. They <em>argue</em>. The disagreements are preserved.</h1>
+
+    <p class="lead" style="margin-top: 32px; max-width: 60ch;">
+      gtm-mavericks runs your go-to-market strategy through a debate panel of
+      Draper, Jobs, Ogilvy, Clow, Halbert, and Dunford. They critique your ICP.
+      They fight over positioning. Forks that don't resolve are preserved as
+      strategic choices with real tradeoffs — not smoothed into average. The
+      output is ship-ready and audit-friendly.
+    </p>
+
+    <div class="install-tile" data-copy="npx @conductor-skills/gtm" style="margin-top: 40px; max-width: 560px;">
+      <div><span class="prompt">$</span><code>npx @conductor-skills/gtm</code></div>
+      <button type="button" data-copy-btn>Copy</button>
+    </div>
+
+    <div class="hero-meta" style="margin-top: 24px;">
+      <span class="pill" style="color: var(--sage); border-color: color-mix(in oklab, var(--sage) 40%, transparent);">● Shipped</span>
+      <span>30–60 min runs</span>
+      <span>Apache 2.0</span>
+      <span>Works in Claude Code · Codex · Gemini · OpenCode</span>
+    </div>
+  </div>
+</section>
+
+<!-- ---------- HOW IT WORKS ---------- -->
+<section>
+  <div class="wrap">
+    <header class="section-head reveal">
+      <span class="eyebrow"><span class="num">01</span><span class="rule"></span>How it runs</span>
+      <h2>30 minutes of <em>real</em> GTM rigor, on a server, while you're somewhere else.</h2>
+    </header>
+
+    <div class="reveal-stagger" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--s-7); max-width: 900px;">
+        <div>
+          <h3 style="font-family: var(--display); font-size: 1.4rem; font-weight: 400; color: var(--paper);">1 · Intake</h3>
+          <p style="margin-top: 12px; color: var(--paper-2); line-height: 1.55;">
+            Short conversation in your agent — what's the product, who's the buyer if you know,
+            which mode (launching new / repositioning / campaign). Then the workflow takes over.
+          </p>
+        </div>
+        <div>
+          <h3 style="font-family: var(--display); font-size: 1.4rem; font-weight: 400; color: var(--paper);">2 · Discovery</h3>
+          <p style="margin-top: 12px; color: var(--paper-2); line-height: 1.55;">
+            Anthropic's web search browses the market and pulls customer signals from your
+            corpus URLs or files. Real quotes with citable sources — not "imagine your customer thinking…"
+          </p>
+        </div>
+        <div>
+          <h3 style="font-family: var(--display); font-size: 1.4rem; font-weight: 400; color: var(--paper);">3 · The panel</h3>
+          <p style="margin-top: 12px; color: var(--paper-2); line-height: 1.55;">
+            Six personas, each in their own parallel LLM task, each instructed to apply only
+            their operating principles. Draper goes hard on emotion. Jobs reduces to one sentence.
+            Ogilvy demands a proof per claim. The synthesis loop probes adversarially until satisfied.
+          </p>
+        </div>
+        <div>
+          <h3 style="font-family: var(--display); font-size: 1.4rem; font-weight: 400; color: var(--paper);">4 · The deliverable</h3>
+          <p style="margin-top: 12px; color: var(--paper-2); line-height: 1.55;">
+            Three voices draft every asset in parallel — Dunford, Halbert, Ogilvy — a judge LLM
+            picks the strongest, and the losers stay in the appendix for comparison. Rendered to
+            3-tier markdown + PDF inside Conductor. No local LaTeX.
+          </p>
+        </div>
+    </div>
+  </div>
+</section>
+
+<!-- ---------- THE PANEL ---------- -->
+<section>
+  <div class="wrap">
+    <header class="section-head reveal">
+      <span class="eyebrow"><span class="num">02</span><span class="rule"></span>The panel</span>
+      <h2>Each persona is a <em>structured</em> operating system. Not a vibe-based costume.</h2>
+      <p class="sub">
+        Every persona file at <code style="color: var(--amber);">references/personas/&lt;name&gt;.md</code>
+        defines operating_principles, evaluation_questions, signature_moves, anti_patterns,
+        voice_samples, and panel_contribution. The workflow applies them mechanically.
+      </p>
+    </header>
+
+    <div class="personas reveal-stagger">
+
+      <article class="persona">
+        <span class="role">B2C · category creation</span>
+        <span class="nm">Don Draper</span>
+        <p class="move">"It's toasted." Reframes objections as virtues. Headlines before body. Refuses bullet lists.</p>
+        <div class="strong"><b>Strongest at</b> · lifestyle, brand</div>
+      </article>
+
+      <article class="persona">
+        <span class="role">Premium · experience</span>
+        <span class="nm">Steve Jobs</span>
+        <p class="move">Reduces to one sentence. Names the enemy. "1,000 songs in your pocket."</p>
+        <div class="strong"><b>Strongest at</b> · experience-led products</div>
+      </article>
+
+      <article class="persona">
+        <span class="role">B2B · considered</span>
+        <span class="nm">David Ogilvy</span>
+        <p class="move">Long copy that earns the short version. Proof per claim. "The loudest noise is the electric clock."</p>
+        <div class="strong"><b>Strongest at</b> · B2B, considered purchases</div>
+      </article>
+
+      <article class="persona">
+        <span class="role">Challenger</span>
+        <span class="nm">Lee Clow</span>
+        <p class="move">Cultural manifesto. Brand at the center, product at the edges. "Here's to the crazy ones."</p>
+        <div class="strong"><b>Strongest at</b> · challenger brands</div>
+      </article>
+
+      <article class="persona">
+        <span class="role">Direct response</span>
+        <span class="nm">Gary Halbert</span>
+        <p class="move">Offer plus urgency plus proof plus P.S. "Dear Friend…" Direct-response.</p>
+        <div class="strong"><b>Strongest at</b> · DTC, outbound, info products</div>
+      </article>
+
+      <article class="persona">
+        <span class="role">B2B SaaS</span>
+        <span class="nm">April Dunford</span>
+        <p class="move">Five-component canvas. Sales-narrative test. Names the actual alternative the buyer is considering.</p>
+        <div class="strong"><b>Strongest at</b> · B2B SaaS</div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ---------- A REAL DISAGREEMENT ---------- -->
+<section>
+  <div class="wrap" style="max-width: 900px;">
+    <header class="section-head reveal">
+      <span class="eyebrow"><span class="num">03</span><span class="rule"></span>From a real run</span>
+      <h2>What disagreement looks like when Draper, Halbert, and Dunford <em>actually argue</em>.</h2>
+      <p class="sub">
+        Excerpted verbatim from a workflow run on a craft chocolate subscription
+        (Mode B reposition). This is what the panel produces when it doesn't
+        smooth to average: concrete tradeoffs the operator can reason about.
+      </p>
+    </header>
+
+    <aside class="excerpt reveal">
+      <span class="quotemark" aria-hidden="true">"</span>
+      <span class="label">Strategic fork · First Purchase Offer</span>
+      <h4>Single Bar vs. Tasting Flight</h4>
+
+      <div class="opts">
+        <div class="opt">
+          <span class="badge">A</span>
+          <div>
+            <div class="h">$18 single bar with full-refund guarantee.</div>
+            <div class="t">If you don't taste the difference from Dandelion in the first bite, keep the bar and we refund. Slower subscriber acquisition. Most buyers need 2–3 purchases before subscribing, extending CAC payback from 1 month to 3–4. Lower AOV means more transactions to break even. Guarantee claim rate is real risk at industry-typical 15–20%.</div>
+          </div>
+        </div>
+        <div class="opt">
+          <span class="badge">B</span>
+          <div>
+            <div class="h">$39 three-bar tasting flight with guarantee.</div>
+            <div class="t">Three distinct origins with side-by-side tasting guide. $39 feels steeper to ICPs who "don't want another $18 mistake" (now asking for a $39 mistake). Decision paralysis on origin selection. Guarantee exposure is 3×.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="rec">Recommendation · <b>Option A</b></div>
+    </aside>
+  </div>
+</section>
+
+<!-- ---------- TRY IT ---------- -->
+<section>
+  <div class="wrap">
+    <header class="section-head reveal">
+      <span class="eyebrow"><span class="num">04</span><span class="rule"></span>Try it</span>
+      <h2>Paste any of these into your agent. The intake takes it from there.</h2>
+    </header>
+
+    <ul class="try reveal-stagger">
+
+      <li class="prompt-card">
+        <span class="label">New product · no traction yet</span>
+        <p class="text">"let's run gtm for FlightCalm — iOS app using Apple Watch HRV to trigger mid-flight breathing exercises for anxious flyers. 4 interview transcripts in ~/Desktop/interviews/."</p>
+      </li>
+
+      <li class="prompt-card">
+        <span class="label">Repositioning · B2B SaaS at a plateau</span>
+        <p class="text">"we sell Hublink. $8M ARR Series B. Win rate dropped 15% YoY against Linear/Notion. Demos land, deals stall. Reposition."</p>
+      </li>
+
+      <li class="prompt-card">
+        <span class="label">Launch campaign · positioning fixed</span>
+        <p class="text">"Earnpay Advance — instant earned-wage access for hourly workers in 12 states. Positioning is already approved. Run the campaign mode."</p>
+      </li>
+
+      <li class="prompt-card">
+        <span class="label">Mid-run check-in</span>
+        <p class="text">"where are we on the gtm run?"</p>
+      </li>
+
+      <li class="prompt-card">
+        <span class="label">Halt for review</span>
+        <p class="text">"pause the run, I want to look at the ICP before positioning starts"</p>
+      </li>
+
+      <li class="prompt-card">
+        <span class="label">Resume across sessions</span>
+        <p class="text">"pause the run, I'll be back tomorrow" → next day, fresh session → "where were we?"</p>
+      </li>
+
+    </ul>
+  </div>
+</section>
+
+<!-- ---------- DELIVERABLES ---------- -->
+<section>
+  <div class="wrap">
+    <header class="section-head reveal">
+      <span class="eyebrow"><span class="num">05</span><span class="rule"></span>What you get</span>
+      <h2>Deliverables land in <code style="color:var(--amber); font-size:0.8em">gtm-output/&lt;run-id&gt;/</code></h2>
+    </header>
+
+    <ul class="deliv reveal-stagger">
+      <li>
+        <div class="fname">gtm-full.md<br>gtm-full.pdf</div>
+        <div class="desc">The assembled 3-tier doc — Executive Summary, Part 1 Deliverables, Part 2 Appendix with panel disagreements and the decisions log. PDF generated server-side; no local LaTeX needed.</div>
+      </li>
+      <li>
+        <div class="fname">bundle.json</div>
+        <div class="desc">All artifacts as structured JSON for downstream tooling. Includes non-winning voice variants for each asset, so you can compare what the judge picked against what it skipped.</div>
+      </li>
+      <li>
+        <div class="fname">executive_summary.json</div>
+        <div class="desc">TL;DR, key decisions, 90-day action plan, KPIs, gaps and risks. Every line traces back through the decisions log to a panel critique or strategic fork.</div>
+      </li>
+      <li>
+        <div class="fname">gtm-deck.pdf<br>gtm-deck.html</div>
+        <div class="desc">Slide deck — only if you ask for it after the run. Slides render via <code>scripts/render_slides.sh</code> (requires marp).</div>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- ---------- CLOSING ---------- -->
+<section>
+  <div class="wrap cta-wrap">
+    <h2 class="reveal">Run your first <em>panel</em>.</h2>
+    <div class="ctas">
+      <a class="btn btn-primary" href="../#install">
+        Install <span class="arrow">→</span>
+      </a>
+      <a class="btn btn-ghost" href="https://github.com/conductor-oss/awesome-skills/tree/main/gtm-mavericks" target="_blank" rel="noopener">
+        Source on GitHub <span class="arrow">↗</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <div>© Orkes · Apache 2.0</div>
+    <ul>
+      <li><a href="../">Home</a></li>
+      <li><a href="https://github.com/conductor-oss/awesome-skills" target="_blank" rel="noopener">Repo</a></li>
+      <li><a href="https://orkes.io" target="_blank" rel="noopener">Orkes</a></li>
+    </ul>
+  </div>
+</footer>
+
+<script src="../assets/app.js" defer></script>
+</body>
+</html>
