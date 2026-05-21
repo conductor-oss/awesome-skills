@@ -8,28 +8,28 @@ Any static file server works. From the repo root:
 
 ```bash
 # Python
-python3 -m http.server 8000 -d site
+python3 -m http.server 8000 -d docs
 
 # Or Node, if you have it
-npx serve site
+npx serve docs
 ```
 
 Then open <http://localhost:8000>.
 
 ## Deploy
 
-Designed to drop onto GitHub Pages, Cloudflare Pages, Netlify, or any static host. Point the server at `site/` and you're done — no build, no env vars.
+Designed to drop onto GitHub Pages, Cloudflare Pages, Netlify, or any static host. Point the server at `docs/` and you're done — no build, no env vars.
 
 For GitHub Pages from this repo:
 
 1. Settings → Pages → Source: **Deploy from a branch**
-2. Branch: `main` / folder: `/site`
+2. Branch: `main` / folder: `/docs`
 3. Save. URL appears at the top of the page within a minute.
 
 ## Structure
 
 ```
-site/
+docs/
 ├── index.html                  # landing page
 ├── skills/
 │   └── gtm-mavericks.html      # featured skill detail
@@ -42,7 +42,7 @@ site/
 
 ## Adding a new skill page
 
-1. Drop a new file under `site/skills/<name>.html`. Copy `gtm-mavericks.html` as the starting template — it already wires up nav, fonts, and shared styles.
+1. Drop a new file under `docs/skills/<name>.html`. Copy `gtm-mavericks.html` as the starting template — it already wires up nav, fonts, and shared styles.
 2. Add a card to the **Featured skill** / showcase section in `index.html`.
 3. If the new skill has its own npm package, add an install row to the install block in `index.html`.
 
